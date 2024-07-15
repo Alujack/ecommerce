@@ -20,7 +20,7 @@ class StockAdmin(admin.ModelAdmin):
 
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ('seller', 'stock', 'name', 'created_at')
+    list_display = ('seller',  'name', 'created_at')
 
 
 @admin.register(CustomerList)

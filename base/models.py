@@ -1,14 +1,57 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+import uuid
 
 
-class User(models.Model):
+def generate_uuid():
+    return str(uuid.uuid4())
+
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, username, password=None, **extra_fields):
+        if not email:
+            raise ValueError('The Email field must be set')
+        email = self.normalize_email(email)
+        username = username
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self.create_user(email, password, **extra_fields)
+
+
+class User(AbstractBaseUser, PermissionsMixin):
+    id = models.UUIDField(
+        primary_key=True, default=generate_uuid, editable=False)
+    username = models.CharField(unique=True, max_length=255, null=True)
     email = models.EmailField(unique=True, null=False)
-    password_hash = models.CharField(max_length=255, null=False)
-    first_name = models.CharField(max_length=255, null=False)
-    last_name = models.CharField(max_length=255, null=False)
+    password = models.CharField(max_length=255, null=False)
+    first_name = models.CharField(max_length=255, null=True, blank=True)
+    last_name = models.CharField(max_length=255,  null=True, blank=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     role = models.CharField(max_length=255, null=True, blank=True)
     image = models.ImageField(upload_to='images/users', null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
 
 class Stock(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE)
@@ -16,10 +59,13 @@ class Stock(models.Model):
 
 
 class Store(models.Model):
-    seller = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    stock = models.ForeignKey(Stock, on_delete=models.CASCADE, null=True, blank=True)
+    seller = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True)
+    stock = models.ForeignKey(
+        Stock, on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=255)
-    address = models.ForeignKey("Address", on_delete=models.CASCADE, null=True, blank=True)
+    address = models.ForeignKey(
+        "Address", on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -29,7 +75,7 @@ class CustomerList(models.Model):
 
 
 class Address(models.Model):
-    users = models.ManyToManyField(User)
+    users = models.ManyToManyField(User, null=True, blank=True)
     unit_number = models.IntegerField(null=True, blank=True)
     street_number = models.IntegerField(null=True, blank=True)
     address_line1 = models.CharField(max_length=255, null=True, blank=True)
@@ -49,7 +95,8 @@ class ProductCategory(models.Model):
 
 
 class Product(models.Model):
-    category = models.ForeignKey(ProductCategory, null=True, blank=True, on_delete=models.CASCADE)
+    category = models.ForeignKey(
+        ProductCategory, null=True, blank=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField()
     product_image = models.ImageField(
@@ -65,7 +112,8 @@ class ProductItem(models.Model):
 
 
 class Variation(models.Model):
-    category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, null=True, blank=True)
+    category = models.ForeignKey(
+        ProductCategory, on_delete=models.CASCADE, null=True, blank=True)
     attribute_type = models.CharField(max_length=255, null=True, blank=True)
 
 
@@ -88,7 +136,7 @@ class Promotion(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     categories = models.ManyToManyField(
-        ProductCategory, through='PromotionCategory', null=True, blank=True)
+        ProductCategory, through='PromotionCategory')
 
 
 class PromotionCategory(models.Model):
@@ -104,7 +152,8 @@ class OrderLine(models.Model):
 
 
 class ShoppingCartItem(models.Model):
-    customer = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    customer = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True)
     product_item = models.ForeignKey(ProductItem, on_delete=models.CASCADE)
     qty = models.PositiveIntegerField()
 
@@ -140,7 +189,8 @@ class ShopOrder(models.Model):
         ('completed', 'completed'),
         ('delivered', 'delivered')
     ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE,  null=True, blank=True)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,  null=True, blank=True)
     order_date = models.DateField(auto_now_add=True)
     payment_method = models.ForeignKey(
         UserPaymentMethod, on_delete=models.CASCADE)
@@ -148,7 +198,8 @@ class ShopOrder(models.Model):
     shipping_method = models.ForeignKey(
         'ShippingMethod', on_delete=models.CASCADE, null=True, blank=True)
     order_total = models.PositiveIntegerField()
-    status = models.CharField(max_length=255, choices=STATUS, null=True, blank=True)
+    status = models.CharField(
+        max_length=255, choices=STATUS, null=True, blank=True)
 
 
 class OrderHistory(models.Model):
@@ -167,10 +218,14 @@ class Favourite(models.Model):
 
 
 class Draft(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
+    store = models.ForeignKey(
+        Store, on_delete=models.CASCADE, null=True, blank=True)
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, null=True, blank=True)
 
 
 class Publish(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
+    store = models.ForeignKey(
+        Store, on_delete=models.CASCADE, null=True, blank=True)
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, null=True, blank=True)
