@@ -1,14 +1,20 @@
-# In your Django app's urls.py
-from django.urls import path
-from .views import create_or_update_user
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
+from django.urls import path, re_path
+from .views import (
+    CustomProviderAuthView,
+    CustomTokenObtainPairView,
+    CustomTokenRefreshView,
+    CustomTokenVerifyView,
+    LogoutView
 )
 
 urlpatterns = [
-    path('create-or-update-user/', create_or_update_user,
-         name='create_or_update_user'),
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    re_path(
+        r'^o/(?P<provider>\S+)/$',
+        CustomProviderAuthView.as_view(),
+        name='provider-auth'
+    ),
+    path('jwt/create/', CustomTokenObtainPairView.as_view()),
+    path('jwt/refresh/', CustomTokenRefreshView.as_view()),
+    path('jwt/verify/', CustomTokenVerifyView.as_view()),
+    path('logout/', LogoutView.as_view()),
 ]

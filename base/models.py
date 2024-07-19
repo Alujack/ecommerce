@@ -8,32 +8,40 @@ def generate_uuid():
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, username, password=None, **extra_fields):
+    def create_user(self, email, password=None, **kwargs):
         if not email:
-            raise ValueError('The Email field must be set')
+            raise ValueError('Users must have an email address')
+
         email = self.normalize_email(email)
-        username = username
-        user = self.model(email=email, **extra_fields)
+        email = email.lower()
+
+        user = self.model(
+            email=email,
+            **kwargs
+        )
+
         user.set_password(password)
         user.save(using=self._db)
+
         return user
 
-    def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
+    def create_superuser(self, email, password=None, **kwargs):
+        user = self.create_user(
+            email,
+            password=password,
+            **kwargs
+        )
 
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True.')
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
+        user.is_staff = True
+        user.is_superuser = True
+        user.save(using=self._db)
 
-        return self.create_user(email, password, **extra_fields)
+        return user
 
 
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(
         primary_key=True, default=generate_uuid, editable=False)
-    username = models.CharField(unique=True, max_length=255, null=True)
     email = models.EmailField(unique=True, null=False)
     password = models.CharField(max_length=255, null=False)
     first_name = models.CharField(max_length=255, null=True, blank=True)
@@ -50,7 +58,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return self.email
 
 
 class Stock(models.Model):
