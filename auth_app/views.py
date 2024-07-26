@@ -1,5 +1,6 @@
 from django.conf import settings
 from rest_framework.views import APIView
+
 from rest_framework.response import Response
 from rest_framework import status
 from djoser.social.views import ProviderAuthView
@@ -8,7 +9,10 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView
 )
-
+from rest_framework import viewsets
+from api.serializers import UserSerializer
+from base.models import User
+from rest_framework.decorators import api_view
 
 class CustomProviderAuthView(ProviderAuthView):
     def post(self, request, *args, **kwargs):
@@ -116,3 +120,16 @@ class LogoutView(APIView):
         response.delete_cookie('refresh')
 
         return response
+
+
+@api_view(['GET', 'PUT'])
+def update_user(request, pk):
+    user = User.objects.get(id=pk)
+    if request.method == 'GET':
+        serializer = UserSerializer(user, many=False)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        serializer = UserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)

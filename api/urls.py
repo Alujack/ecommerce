@@ -5,7 +5,7 @@ from .views import (
     ProductViewSet, ProductItemViewSet, VariationViewSet, VariationOptionViewSet, ProductConfigurationViewSet,
     PromotionViewSet, PromotionCategoryViewSet, OrderLineViewSet, ShoppingCartItemViewSet, PaymentTypeViewSet,
     UserPaymentMethodViewSet, UserReviewViewSet, ShopOrderViewSet, OrderHistoryViewSet, ShippingMethodViewSet,
-    FavouriteViewSet, DraftViewSet, PublishViewSet, create
+    FavouriteViewSet, DraftViewSet, PublishViewSet
 )
 from auth_app.views import *
 router = DefaultRouter()

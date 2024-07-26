@@ -83,7 +83,7 @@ class CustomerList(models.Model):
 
 
 class Address(models.Model):
-    users = models.ManyToManyField(User, null=True, blank=True)
+    users = models.ManyToManyField(User)
     unit_number = models.IntegerField(null=True, blank=True)
     street_number = models.IntegerField(null=True, blank=True)
     address_line1 = models.CharField(max_length=255, null=True, blank=True)

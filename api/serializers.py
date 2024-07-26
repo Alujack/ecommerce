@@ -9,12 +9,16 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 User = get_user_model()
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id','email',
-                  'first_name', 'last_name', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['id', 'email', 'password',
+                  'first_name', 'last_name',
+                  'phone_number', 'role',
+                  'image'
+                  ]
+        read_only_fields = ['email', 'password']
 
     def create(self, validated_data):
         user = User.objects.update_or_create(**validated_data)
@@ -27,7 +31,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token['username'] = user.username
         return token
-
 
 
 class StockSerializer(serializers.ModelSerializer):
@@ -56,7 +59,7 @@ class StoreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Store
-        fields = ['seller','name', 'address']
+        fields = ['seller', 'name', 'address']
 
     # def create(self, validated_data):
     #     seller_data = validated_data.pop('seller')
@@ -111,7 +114,6 @@ class StoreSerializer(serializers.ModelSerializer):
     #     instance.save()
 
     #     return instance
-
 
 
 class CustomerListSerializer(serializers.ModelSerializer):
