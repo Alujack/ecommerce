@@ -43,8 +43,7 @@ class StockSerializer(serializers.ModelSerializer):
 
 
 class AddressSerializer(serializers.ModelSerializer):
-    users = UserSerializer(many=True, read_only=True)
-
+    users = UserSerializer(read_only=True)
     class Meta:
         model = Address
         fields = '__all__'
@@ -53,68 +52,35 @@ class AddressSerializer(serializers.ModelSerializer):
 
 
 class StoreSerializer(serializers.ModelSerializer):
-    seller = UserSerializer()
-    # stock = StockSerializer()
     address = AddressSerializer()
 
     class Meta:
         model = Store
-        fields = ['seller', 'name', 'address']
+        fields = '__all__'
 
-    # def create(self, validated_data):
-    #     seller_data = validated_data.pop('seller')
-    #     # stock_data = validated_data.pop('stock')
-    #     address_data = validated_data.pop('address')
+    def create(self, validated_data):
+        address_data = validated_data.pop('address')
+        address_id = address_data.get('id')
+        if address_id:
+            address = Address.objects.get(id=address_id)
+        else:
+            address = Address.objects.create(**address_data)
+        store = Store.objects.create(address=address, **validated_data)
+        return store
 
-    #     # Check if the user with the given email already exists
-    #     email = seller_data.get('email')
-    #     seller = User.objects.filter(email=email).first()
-    #     if not seller:
-    #         seller = User.objects.create(**seller_data)
-    #     else:
-    #         for attr, value in seller_data.items():
-    #             setattr(seller, attr, value)
-    #         seller.save()
-
-    #     # stock = Stock.objects.create(**stock_data)
-    #     address = Address.objects.create(**address_data)
-
-    #     store = Store.objects.create(
-    #         seller=seller, address=address, **validated_data)
-    #     return store
-
-    # def update(self, instance, validated_data):
-    #     seller_data = validated_data.pop('seller', None)
-    #     # stock_data = validated_data.pop('stock', None)
-    #     address_data = validated_data.pop('address', None)
-
-    #     if seller_data:
-    #         email = seller_data.get('email')
-    #         seller = User.objects.filter(email=email).first()
-    #         if not seller:
-    #             seller = User.objects.create(**seller_data)
-    #         else:
-    #             for attr, value in seller_data.items():
-    #                 setattr(seller, attr, value)
-    #             seller.save()
-    #         instance.seller = seller
-
-    #     # if stock_data:
-    #     #     for attr, value in stock_data.items():
-    #     #         setattr(instance.stock, attr, value)
-    #     #     instance.stock.save()
-
-    #     if address_data:
-    #         for attr, value in address_data.items():
-    #             setattr(instance.address, attr, value)
-    #         instance.address.save()
-
-    #     for attr, value in validated_data.items():
-    #         setattr(instance, attr, value)
-    #     instance.save()
-
-    #     return instance
-
+    def update(self, instance, validated_data):
+        address_data = validated_data.pop('address')
+        address_id = address_data.get('id')
+        if address_id:
+            address = Address.objects.get(id=address_id)
+        else:
+            address = Address.objects.create(**address_data)
+        instance.address = address
+        instance.name = validated_data.get('name', instance.name)
+        instance.stock = validated_data.get('stock', instance.stock)
+        instance.seller = validated_data.get('seller', instance.seller)
+        instance.save()
+        return instance
 
 class CustomerListSerializer(serializers.ModelSerializer):
     store = StoreSerializer()

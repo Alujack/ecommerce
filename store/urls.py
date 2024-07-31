@@ -1,10 +1,6 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import  create_or_update_store
-
-
-
+from django.urls import path
+from .views import store_view
 urlpatterns = [
-    path('store/create_or_update/', create_or_update_store,
-         name='create_or_update_store'),
+    path('manage/stores/', store_view, name='store_view'),
+    path('manage/stores/<str:pk>/', store_view, name='store_view_update'),
 ]

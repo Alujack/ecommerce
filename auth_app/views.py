@@ -1,3 +1,6 @@
+from django.contrib.auth.models import User
+from api.serializers import AddressSerializer
+from base.models import Address, User
 from django.conf import settings
 from rest_framework.views import APIView
 
@@ -10,9 +13,10 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView
 )
 from rest_framework import viewsets
-from api.serializers import UserSerializer
+from api.serializers import UserSerializer, AddressSerializer
 from base.models import User
 from rest_framework.decorators import api_view
+
 
 class CustomProviderAuthView(ProviderAuthView):
     def post(self, request, *args, **kwargs):
@@ -124,12 +128,62 @@ class LogoutView(APIView):
 
 @api_view(['GET', 'PUT'])
 def update_user(request, pk):
-    user = User.objects.get(id=pk)
+    try:
+        user = User.objects.get(id=pk)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
     if request.method == 'GET':
         serializer = UserSerializer(user, many=False)
         return Response(serializer.data)
+
     elif request.method == 'PUT':
         serializer = UserSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'POST'])
+def manage_address(request, pk):
+    try:
+        user = User.objects.get(id=pk)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        addresses = Address.objects.get(user=user)
+        if addresses:
+            serializer = AddressSerializer(addresses)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({"error": "No addresses found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'POST':
+        address_data = request.data
+        serializer = AddressSerializer(data=address_data)
+
+        if serializer.is_valid():
+            # Check if an address with the already exists for this user
+            existing_address = Address.objects.get(
+                user=user,
+            )
+
+            if existing_address:
+                # Update the existing address
+                for attr, value in address_data.items():
+                    setattr(existing_address, attr, value)
+                existing_address.save()
+                updated_address = existing_address
+                created = False
+            else:
+                # Create a new address
+                updated_address = Address.objects.create(
+                    user=user
+                    ** address_data
+                )
+                created = True
+
+            return Response(AddressSerializer(updated_address).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -30,8 +30,7 @@ class CustomerListAdmin(admin.ModelAdmin):
 
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
-    list_display = ('unit_number', 'street_number', 'address_line1',
-                    'address_line2', 'city', 'state', 'postal_code', 'country')
+    list_display = ('village','country')
 
 
 @admin.register(ProductCategory)
