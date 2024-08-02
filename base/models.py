@@ -69,8 +69,6 @@ class Store(models.Model):
     name = models.CharField(max_length=255)
     address = models.ForeignKey(
         "Address", on_delete=models.CASCADE, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 
 class CustomerList(models.Model):
@@ -92,9 +90,8 @@ class Address(models.Model):
     country = models.CharField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, null=True,)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+        User, on_delete=models.CASCADE, null=True)
+    
 class ProductCategory(models.Model):
     id = models.UUIDField(
         primary_key=True, default=generate_uuid, editable=False)
@@ -103,34 +100,58 @@ class ProductCategory(models.Model):
     category_name = models.CharField(max_length=255)
     image = models.ImageField(
         upload_to='images/categories/', null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-
-class Variation(models.Model):
+class Variations(models.Model):
     id = models.UUIDField(
         primary_key=True, default=generate_uuid, editable=False)
     category = models.ForeignKey(
         ProductCategory, on_delete=models.CASCADE, null=True, blank=True)
     attribute_type = models.CharField(max_length=255, null=True, blank=True)
 
+  
+
 
 class VariationOption(models.Model):
     id = models.UUIDField(
         primary_key=True, default=generate_uuid, editable=False)
     variation = models.ForeignKey(
-        Variation, on_delete=models.CASCADE, null=True, blank=True)
-    option_value = models.CharField(max_length=255, null=True, blank=True)
+        Variations,  related_name='options',null=True, on_delete=models.CASCADE)
+    value = models.CharField(max_length=255, null=True, blank=True)
 
 
-class ProductConfiguration(models.Model):
+
+
+class Product(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    image = models.ImageField(upload_to='images/products/', null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    store = models.ForeignKey(
+        Store, related_name='products', on_delete=models.CASCADE, null=True)
+    categories = models.ManyToManyField(
+        ProductCategory, related_name='products')
+
+
+
+class ProductItem(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    product = models.ForeignKey(
+        Product, related_name='variations',null=True, on_delete=models.CASCADE)
+    variation_options = models.ManyToManyField(
+        VariationOption, related_name='product_variations')
+
+
+
+class Stock(models.Model):
     id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
-    product_item = models.ForeignKey(ProductItem, on_delete=models.CASCADE)
-    variation_option = models.ForeignKey(
-        VariationOption, on_delete=models.CASCADE, null=True, blank=True)
+         primary_key=True, default=uuid.uuid4, editable=False)
+    quantity = models.IntegerField()
+    variation = models.ForeignKey(ProductItem, related_name='stock', null=True, on_delete=models.CASCADE)
+    store = models.ForeignKey(Store, related_name='stock', on_delete=models.CASCADE, null = True)
 
 
+    
 class Promotion(models.Model):
     id = models.UUIDField(
         primary_key=True, default=generate_uuid, editable=False)

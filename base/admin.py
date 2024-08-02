@@ -1,8 +1,8 @@
 from django.contrib import admin
 from .models import (
     User, Stock, Store, CustomerList, Address, ProductCategory,
-    Product, ProductItem, Variation,
-    VariationOption, ProductConfiguration, Promotion, PromotionCategory,
+    Product, ProductItem, Variations,
+    VariationOption, Promotion, PromotionCategory,
     OrderLine, ShoppingCartItem, PaymentType, UserPaymentMethod,
     UserReview, ShopOrder, OrderHistory, ShippingMethod, Favourite, Draft, Publish
 )
@@ -10,17 +10,17 @@ from .models import (
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id','email', 'first_name', 'last_name', 'phone_number','password')
+    list_display = ('id', 'email', 'first_name', 'last_name', 'phone_number')
 
 
 @admin.register(Stock)
 class StockAdmin(admin.ModelAdmin):
-    list_display = ('product', 'quantity')
+    list_display = ('variation', 'quantity', 'store')
 
 
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ('seller',  'name', 'created_at')
+    list_display = ('seller',  'name')
 
 
 @admin.register(CustomerList)
@@ -30,7 +30,7 @@ class CustomerListAdmin(admin.ModelAdmin):
 
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
-    list_display = ('village','country')
+    list_display = ('village', 'country')
 
 
 @admin.register(ProductCategory)
@@ -40,28 +40,22 @@ class ProductCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('category', 'name',
-                    'description', 'product_image', 'price')
+    list_display = ('name', 'description', 'price')
 
 
 @admin.register(ProductItem)
 class ProductItemAdmin(admin.ModelAdmin):
-    list_display = ('product', 'quantity_in_stock')
+    list_display = ('product', 'id')
 
 
-@admin.register(Variation)
+@admin.register(Variations)
 class VariationAdmin(admin.ModelAdmin):
     list_display = ('category', 'attribute_type')
 
 
 @admin.register(VariationOption)
 class VariationOptionAdmin(admin.ModelAdmin):
-    list_display = ('variation', 'option_value')
-
-
-@admin.register(ProductConfiguration)
-class ProductConfigurationAdmin(admin.ModelAdmin):
-    list_display = ('product_item', 'variation_option')
+    list_display = ('variation', 'value')
 
 
 @admin.register(Promotion)

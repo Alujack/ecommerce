@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from base.models import (
-    User, Stock, Store, CustomerList, Address, ProductCategory, Product, ProductItem, Variation,
-    VariationOption, ProductConfiguration, Promotion, PromotionCategory, OrderLine, ShoppingCartItem,
+    User, Stock, Store, CustomerList, Address, ProductCategory, Product, ProductItem, Variations,
+    VariationOption, Promotion, PromotionCategory, OrderLine, ShoppingCartItem,
     PaymentType, UserPaymentMethod, UserReview, ShopOrder, OrderHistory, ShippingMethod, Favourite, Draft, Publish
 )
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -111,7 +111,7 @@ class VariationSerializer(serializers.ModelSerializer):
     category = ProductCategorySerializer()
 
     class Meta:
-        model = Variation
+        model = Variations
         fields = '__all__'
 
 
@@ -130,16 +130,6 @@ class ProductItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductItem
         fields = '__all__'
-
-
-class ProductConfigurationSerializer(serializers.ModelSerializer):
-    product_item = ProductItemSerializer()
-    variation_option = VariationOptionSerializer()
-
-    class Meta:
-        model = ProductConfiguration
-        fields = '__all__'
-
 
 class PromotionCategorySerializer(serializers.ModelSerializer):
     category = ProductCategorySerializer()
