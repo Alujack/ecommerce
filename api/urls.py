@@ -44,4 +44,6 @@ urlpatterns = [
     path('auth/',include('djoser.urls')),
     path('auth/', include('auth_app.urls')),
     path('store/', include('store.urls')),
+    path('product/', include('product_app.urls')),
+
 ]

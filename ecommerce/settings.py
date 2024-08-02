@@ -40,8 +40,6 @@ ALLOWED_HOSTS = getenv('DJANGO_ALLOWED_HOSTS',
                        '127.0.0.1,localhost').split(',')
 
 
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -69,7 +67,7 @@ INSTALLED_APPS = [
     'admin_app',     # Admin dashboard app
     'notification_app',       # Notifications app
     'store',
-   
+
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -169,10 +167,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ecommerce',
-        'USER': 'root',
-        'PASSWORD': 'mylinda',
+        'USER': 'yan',
+        'PASSWORD': 'yan',
         'HOST': '127.0.0.1',
-        'PORT': '3307'
+        'PORT': '3306'
     }
 }
 

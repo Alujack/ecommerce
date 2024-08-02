@@ -62,24 +62,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
-
-class Stock(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
-    product = models.ForeignKey('Product', on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-
-
 class Store(models.Model):
     id = models.UUIDField(
         primary_key=True, default=generate_uuid, editable=False)
     seller = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    stock = models.ForeignKey(
-        Stock, on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=255)
     address = models.ForeignKey(
         "Address", on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class CustomerList(models.Model):
@@ -102,6 +93,8 @@ class Address(models.Model):
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True,)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 class ProductCategory(models.Model):
     id = models.UUIDField(
         primary_key=True, default=generate_uuid, editable=False)
@@ -110,27 +103,8 @@ class ProductCategory(models.Model):
     category_name = models.CharField(max_length=255)
     image = models.ImageField(
         upload_to='images/categories/', null=True, blank=True)
-
-
-class Product(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
-    category = models.ForeignKey(
-        ProductCategory, null=True, blank=True, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    description = models.TextField()
-    product_image = models.ImageField(
-        upload_to='images/product/', null=True, blank=True)
-    price = models.PositiveIntegerField()
-
-
-class ProductItem(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity_in_stock = models.PositiveIntegerField()
-    variations = models.ManyToManyField(
-        'VariationOption', through='ProductConfiguration')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Variation(models.Model):

@@ -12,18 +12,17 @@ User = get_user_model()
 @api_view(['GET', 'POST', 'PUT'])
 def store_view(request, pk=None):
     if request.method == 'GET':
-        user_id = request.query_params.get('seller')
-        if user_id:
-            stores = Store.objects.filter(seller__id=user_id)
-        serializer = StoreSerializer(stores)
-        return Response(serializer.data)
+        try:
+            store = Store.objects.get(seller__id=pk)
+            serializer = StoreSerializer(store)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Store.DoesNotExist:
+            return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
 
     elif request.method == 'POST':
-       
         try:
             user = User.objects.get(id=pk)
-            if user:
-                request.data['seller'] = pk
+            request.data['seller'] = pk
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -42,7 +41,10 @@ def store_view(request, pk=None):
         except Store.DoesNotExist:
             return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        
+        user_id = request.data.get('seller')
+        if not user_id:
+            return Response({'error': 'Seller ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             user = User.objects.get(id=user_id)
             request.data['seller'] = user.id
@@ -52,7 +54,5 @@ def store_view(request, pk=None):
         serializer = StoreSerializer(store, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
