@@ -6,8 +6,9 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from base.models import ProductCategory, Store, Stock, Product, VariationOption,Variations
-from .serializers import ProductSerializer, ProductCategorySerializer,VariationOptionSerializer
+from rest_framework import viewsets
+from base.models import ProductCategory, Store, Stock, Product, VariationOption, Variations
+from .serializers import ProductSerializer, ProductCategorySerializer, VariationOptionSerializer
 User = get_user_model()
 
 
@@ -81,8 +82,18 @@ def get_one_category_and_create_detail_variations(request, pk=None):
         except Exception as e:
             print(f'Unexpected error: {e}')
             return Response({'detail': 'An error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-class ProductDetailView(generics.RetrieveAPIView):
+
+
+class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    lookup_field = 'id'
+
+
+@api_view(['POST'])
+def create_product(request):
+    if request.method == 'POST':
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
