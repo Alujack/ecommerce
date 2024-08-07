@@ -13,7 +13,7 @@ User = get_user_model()
 def store_view(request, pk=None):
     if request.method == 'GET':
         try:
-            store = Store.objects.get(seller__id=pk)
+            store = Store.objects.get(seller=pk)
             serializer = StoreSerializer(store)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Store.DoesNotExist:

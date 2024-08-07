@@ -56,16 +56,15 @@ INSTALLED_APPS = [
     'djoser',
     'social_django',
     'api.apps.ApiConfig',
-    'auth_app',                # Custom user management app
-    'product_app',             # Product management app
-    'order_app',               # Order management app
-    'payment_app',             # Payment integration app
-    'shipping_app',            # Shipping and delivery app
-    'review_app',              # Review and rating app
-    'search_app',              # Search and filtering app
-    'promotion_app',           # Promotions and discounts app
-    'admin_app',     # Admin dashboard app
-    'notification_app',       # Notifications app
+    'auth_app',               
+    'product_app',            
+    'order_app',               
+    'payment_app',             
+    'shipping_app',            
+    'review_app',              
+    'search_app',              
+    'promotion_app',           
+    'admin_app',               
     'store',
 
 ]
@@ -78,6 +77,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
+    'product_app.middleware.StoreMiddleware'
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -103,6 +104,22 @@ TEMPLATES = [
     },
 ]
 
+
+# Email backend
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Email settings
+EMAIL_HOST = 'smtp.gmail.com'  # Your SMTP server
+EMAIL_PORT = 587  # SMTP port (587 for TLS, 465 for SSL)
+EMAIL_USE_TLS = True  # Use TLS (recommended)
+EMAIL_USE_SSL = False  # Use SSL (if not using TLS)
+EMAIL_HOST_USER = 'yeantouch12345@gmail.com'  # Your email address
+EMAIL_HOST_PASSWORD = 'xdni ckxc fdch zxci '  # Your email password
+
+# From email address
+DEFAULT_FROM_EMAIL = 'lindayan11042004@gmail.com'
+
+
 WSGI_APPLICATION = 'ecommerce.wsgi.application'
 
 AUTHENTICATION_BACKENDS = [
@@ -121,12 +138,13 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
+
     'PASSWORD_RESET_CONFIRM_URL': 'password-reset/{uid}/{token}',
-    'SEND_ACTIVATION_EMAIL': False,
+    'SEND_ACTIVATION_EMAIL': True,
     'ACTIVATION_URL': 'activation/{uid}/{token}',
     'USER_CREATE_PASSWORD_RETYPE': True,
     'PASSWORD_RESET_CONFIRM_RETYPE': True,
-    'SEND_CONFIRMATION_EMAIL': False,
+    'SEND_CONFIRMATION_EMAIL': True,
     'TOKEN_MODEL': None,
     'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': getenv('REDIRECT_URLS').split(',')
 }

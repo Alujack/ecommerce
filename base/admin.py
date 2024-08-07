@@ -15,7 +15,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Stock)
 class StockAdmin(admin.ModelAdmin):
-    list_display = ('variation', 'quantity', 'store')
+    list_display = ('product_item_variation', 'quantity', 'store')
 
 
 @admin.register(Store)
@@ -92,7 +92,7 @@ class UserPaymentMethodAdmin(admin.ModelAdmin):
 
 @admin.register(UserReview)
 class UserReviewAdmin(admin.ModelAdmin):
-    list_display = ('user', 'order_product', 'review_text', 'rating')
+    list_display = ('user', 'product', 'comment', 'rating')
 
 
 @admin.register(ShopOrder)

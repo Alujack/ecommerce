@@ -152,10 +152,11 @@ def manage_address(request, pk):
         user = User.objects.get(id=pk)
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    print(user)
 
     if request.method == 'GET':
         try:
-            addresses = Address.objects.get(user=user)
+            addresses = Address.objects.filter(user=user).first()
             serializer = AddressSerializer(addresses)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Address.DoesNotExist:
@@ -167,7 +168,7 @@ def manage_address(request, pk):
 
         if serializer.is_valid():
             try:
-                existing_address = Address.objects.get(user=user)
+                existing_address = Address.objects.get(user_id=user.id)
                 for attr, value in address_data.items():
                     setattr(existing_address, attr, value)
                 existing_address.save()
@@ -175,7 +176,7 @@ def manage_address(request, pk):
                 created = False
             except Address.DoesNotExist:
                 updated_address = Address.objects.create(
-                    user=user, **address_data)
+                    user_id=user.id, **address_data)
                 created = True
 
             return Response(AddressSerializer(updated_address).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)

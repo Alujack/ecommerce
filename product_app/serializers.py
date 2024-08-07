@@ -1,90 +1,79 @@
 from rest_framework import serializers
-from base.models import Product, ProductCategory, ProductImage, Variations, VariationOption, Stock, Store, UserReview
+from base.models import Store, ProductCategory, Variations, VariationOption, Product, ProductImage, ProductItem, Stock, Publish, Draft
 
 
 class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
-        fields = ['id', 'category_name', 'image']
-
-
-class ProductImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = ['id', 'image', 'angle']
+        fields = '__all__'
 
 
 class VariationOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationOption
-        fields = ['id', 'value']
+        fields = '__all__'
 
 
-class VariationSerializer(serializers.ModelSerializer):
+class VariationsSerializer(serializers.ModelSerializer):
+    variation_option = VariationOptionSerializer(many=True, read_only=True)
+
     class Meta:
         model = Variations
-        fields = ['id', 'attribute_type']
+        fields = ['id', 'attribute_type', 'variation_option']
 
 
-class StockSerializer(serializers.ModelSerializer):
+class ProductItemSerializer(serializers.ModelSerializer):
+    variation_options = VariationOptionSerializer(many=True, read_only=True)
+
     class Meta:
-        model = Stock
-        fields = ['id', 'quantity', 'variation', 'store']
+        model = ProductItem
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['product_name'] = instance.product.name
+        return representation
 
 
 class StoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Store
-        fields = ['id', 'name']
+        fields = '__all__'
 
 
-class UserReviewSerializer(serializers.ModelSerializer):
+class StockSerializer(serializers.ModelSerializer):
+    product_item = ProductItemSerializer(
+        source='product_item_variation', read_only=True)
+
     class Meta:
-        model = UserReview
-        fields = ['id', 'review_text', 'rating']
+        model = Stock
+        fields = '__all__'
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = '__all__'
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    categories = ProductCategorySerializer()
-    variations = VariationSerializer()
-    stock = StockSerializer()
-    reviews = UserReviewSerializer()
-    store = StoreSerializer()
+    images = ProductImageSerializer(many=True, read_only=True)
+    categories = ProductCategorySerializer(many=True, read_only=True)
+    stock = StockSerializer(read_only=True)
+    variations = VariationsSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'description', 'price', 'categories',
-                  'variations', 'stock', 'reviews', 'store']
+        fields = '__all__'
 
-    def create(self, validated_data):
-        categories_data = validated_data.pop('categories')
-        variations_data = validated_data.pop('variations')
-        stock_data = validated_data.pop('stock')
-        reviews_data = validated_data.pop('reviews')
-        store_data = validated_data.pop('store')
 
-        store, created = Store.objects.get_or_create(**store_data)
+class PublishSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Publish
+        fields = '__all__'
 
-        product = Product.objects.create(store=store, **validated_data)
 
-        for category_data in categories_data:
-            category, created = ProductCategory.objects.get_or_create(
-                **category_data)
-            product.categories.add(category)
-
-        for variation_data in variations_data:
-            variation_options_data = variation_data.pop('variation_options')
-            variation = Variations.objects.create(
-                product=product, **variation_data)
-            for option_data in variation_options_data:
-                option, created = VariationOption.objects.get_or_create(
-                    **option_data)
-                variation.variation_options.add(option)
-
-        for stock_item in stock_data:
-            Stock.objects.create(product=product, **stock_item)
-
-        for review_data in reviews_data:
-            UserReview.objects.create(product=product, **review_data)
-
-        return product
+class DraftSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Draft
+        fields = '__all__'
