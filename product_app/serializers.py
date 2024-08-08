@@ -42,9 +42,6 @@ class StoreSerializer(serializers.ModelSerializer):
 
 
 class StockSerializer(serializers.ModelSerializer):
-    product_item = ProductItemSerializer(
-        source='product_item_variation', read_only=True)
-
     class Meta:
         model = Stock
         fields = '__all__'
@@ -58,9 +55,9 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
-    categories = ProductCategorySerializer(many=True, read_only=True)
-    stock = StockSerializer(read_only=True)
-    variations = VariationsSerializer(many=True, read_only=True)
+    category = ProductCategorySerializer(many=True, read_only=True)
+    stock = StockSerializer(many=True,read_only=True)
+    variations = VariationsSerializer(read_only=True)
 
     class Meta:
         model = Product

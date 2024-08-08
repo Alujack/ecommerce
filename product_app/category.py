@@ -93,8 +93,7 @@ def get_one_category_and_create_detail_variations(request, pk=None):
 
 
 @api_view(['GET'])
-def get_variations_by_category(request, pk=None):
-
+def get_variations_use_category(request, pk=None):
     try:
         category = ProductCategory.objects.get(id=pk)
         variations = Variations.objects.filter(category=category)
@@ -111,7 +110,7 @@ def get_variations_by_category(request, pk=None):
             }
             serialized_variations.append(variation_data)
 
-        return Response({"variations": serialized_variations}, status=status.HTTP_200_OK)
+        return Response(serialized_variations, status=status.HTTP_200_OK)
     except ProductCategory.DoesNotExist:
         return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:

@@ -177,8 +177,8 @@ class ProductItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.ForeignKey(
         Product, related_name='variations', null=True, on_delete=models.CASCADE)
-    variation_options = models.ManyToManyField(
-        VariationOption, related_name='product_variations')
+    variation_option = models.OneToOneField(
+        VariationOption, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"{self.product.name} - {', '.join([option.value for option in self.variation_options.all()])}"
@@ -212,7 +212,7 @@ class Draft(models.Model):
         primary_key=True, default=generate_uuid, editable=False)
     store = models.ForeignKey(
         Store, on_delete=models.CASCADE, null=True, blank=True)
-    product = models.ForeignKey(
+    product = models.OneToOneField(
         Product, on_delete=models.CASCADE, null=True, blank=True)
 
 
@@ -221,7 +221,7 @@ class Publish(models.Model):
         primary_key=True, default=generate_uuid, editable=False)
     store = models.ForeignKey(
         Store, on_delete=models.CASCADE, null=True, blank=True)
-    product = models.ForeignKey(
+    product = models.OneToOneField(
         Product, on_delete=models.CASCADE, null=True, blank=True)
 
 
@@ -321,6 +321,3 @@ class Favourite(models.Model):
         primary_key=True, default=generate_uuid, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-
-
-
