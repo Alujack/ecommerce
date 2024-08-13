@@ -58,8 +58,7 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'auth_app',               
     'product_app',            
-    'order_app',               
-    'payment_app',             
+    'order_app',                     
     'shipping_app',            
     'review_app',              
     'search_app',              
@@ -140,11 +139,11 @@ REST_FRAMEWORK = {
 DJOSER = {
 
     'PASSWORD_RESET_CONFIRM_URL': 'password-reset/{uid}/{token}',
-    'SEND_ACTIVATION_EMAIL': True,
+    'SEND_ACTIVATION_EMAIL': False,
     'ACTIVATION_URL': 'activation/{uid}/{token}',
     'USER_CREATE_PASSWORD_RETYPE': True,
-    'PASSWORD_RESET_CONFIRM_RETYPE': True,
-    'SEND_CONFIRMATION_EMAIL': True,
+    'PASSWORD_RESET_CONFIRM_RETYPE': False,
+    'SEND_CONFIRMATION_EMAIL': False,
     'TOKEN_MODEL': None,
     'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': getenv('REDIRECT_URLS').split(',')
 }

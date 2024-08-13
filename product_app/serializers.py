@@ -15,24 +15,15 @@ class VariationOptionSerializer(serializers.ModelSerializer):
 
 
 class VariationsSerializer(serializers.ModelSerializer):
-    variation_option = VariationOptionSerializer(many=True, read_only=True)
-
     class Meta:
         model = Variations
-        fields = ['id', 'attribute_type', 'variation_option']
+        fields = '__all__'
 
 
 class ProductItemSerializer(serializers.ModelSerializer):
-    variation_options = VariationOptionSerializer(many=True, read_only=True)
-
     class Meta:
         model = ProductItem
         fields = '__all__'
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['product_name'] = instance.product.name
-        return representation
 
 
 class StoreSerializer(serializers.ModelSerializer):

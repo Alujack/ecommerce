@@ -1,0 +1,28 @@
+### Register a New User
+POST http://127.0.0.1:8000/api/auth/users/
+Content-Type: application/json
+
+{
+    "first_name": "testuser",
+    "last_name": "testuser",
+    "email": "testuser@example.com",
+    "password": "testpassword",
+    "re_password": "testpassword"
+}
+
+###
+POST http://127.0.0.1:8000/api/auth/jwt/create/
+Content-Type: application/json
+
+{
+    "email": "hello@gmail.com",
+    "password": "~cG5)B'7%&Ptv_8"
+
+}
+###
+POST http://127.0.0.1:8000/api/auth/jwt/verify/
+Content-Type: application/json
+
+{
+    "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIzMzAzNDEyLCJpYXQiOjE3MjMzMDMxMTIsImp0aSI6IjQ5NDkzMDE3MmIxNDRlNDViMzg5YWI3OTEzODY5MjMyIiwidXNlcl9pZCI6ImQ0ZmI4MmZmLWE4OTAtNGFlNC05NjEzLTQ4ZjYxY2M2YmE3NSJ9.5zlGyFj_dRouN1DVPIwLw-dzm7NTcKlQIn82TWi5ttE"
+}

@@ -147,12 +147,12 @@ def update_user(request, pk):
 
 
 @api_view(['GET', 'POST'])
-def manage_address(request, pk):
+def manage_address(request, pk=None):
+   
     try:
         user = User.objects.get(id=pk)
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-    print(user)
 
     if request.method == 'GET':
         try:

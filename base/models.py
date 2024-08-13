@@ -2,16 +2,6 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 import uuid
-import random
-import string
-
-
-def generate_unique_product_id():
-    while True:
-        product_id = ''.join(random.choices(
-            string.ascii_uppercase + string.digits, k=6))
-        if not Product.objects.filter(product_id=product_id).exists():
-            return product_id
 
 
 def generate_uuid():
@@ -69,9 +59,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['first_name', 'last_name',
                        'phone_number', 'role', 'image']
 
-    def __str__(self):
-        return self.email
-
 
 class CustomerList(models.Model):
     id = models.UUIDField(
@@ -116,9 +103,6 @@ class ProductCategory(models.Model):
     store = models.ForeignKey(
         Store, on_delete=models.CASCADE, null=True, blank=True)
 
-    def __str__(self):
-        return self.category_name
-
 
 class Variations(models.Model):
     id = models.UUIDField(
@@ -126,9 +110,6 @@ class Variations(models.Model):
     category = models.ForeignKey(
         ProductCategory, on_delete=models.CASCADE, null=True, blank=True)
     attribute_type = models.CharField(max_length=255, null=True, blank=True)
-
-    def __str__(self):
-        return self.attribute_type
 
 
 class VariationOption(models.Model):
@@ -138,16 +119,14 @@ class VariationOption(models.Model):
         Variations, related_name='options', null=True, on_delete=models.CASCADE)
     value = models.CharField(max_length=255, null=True, blank=True)
 
-    def __str__(self):
-        return self.value
-
 
 class Product(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product_id = models.CharField(
         max_length=6, unique=True, null=True, blank=True)
     name = models.CharField(max_length=255)
-    description = models.TextField()
+    short_description = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     store = models.ForeignKey(
         Store, related_name='products', on_delete=models.CASCADE, null=True)
@@ -156,9 +135,6 @@ class Product(models.Model):
     categories = models.ManyToManyField(
         ProductCategory, related_name='products')
 
-    def __str__(self):
-        return self.name
-
 
 class ProductImage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -166,22 +142,15 @@ class ProductImage(models.Model):
         Product, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(
         upload_to='images/products/', null=True, blank=True)
-    # e.g., 'front', 'side', 'back'
     angle = models.CharField(max_length=255, null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.product.name} - {self.angle}"
 
 
 class ProductItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.ForeignKey(
         Product, related_name='variations', null=True, on_delete=models.CASCADE)
-    variation_option = models.OneToOneField(
-        VariationOption, on_delete=models.CASCADE, null=True)
-
-    def __str__(self):
-        return f"{self.product.name} - {', '.join([option.value for option in self.variation_options.all()])}"
+    variation_option = models.ForeignKey(
+        VariationOption, related_name='product_variation', on_delete=models.CASCADE, null=True)
 
 
 class Stock(models.Model):
@@ -191,9 +160,6 @@ class Stock(models.Model):
         ProductItem, related_name='stock', null=True, on_delete=models.CASCADE)
     store = models.ForeignKey(
         Store, related_name='stock', on_delete=models.CASCADE, null=True)
-
-    def __str__(self):
-        return f"{self.product_item_variation} - {self.quantity}"
 
 
 class UserReview(models.Model):
@@ -321,3 +287,4 @@ class Favourite(models.Model):
         primary_key=True, default=generate_uuid, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+      

@@ -42,5 +42,4 @@ urlpatterns = [
     path('store/product/publish/<str:pk>/', publish_product, name="publish"),
     path('store/product/draft/<str:pk>/', draft_product, name="draft")
 
-
 ]

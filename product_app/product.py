@@ -69,3 +69,12 @@ def delete_product(request):
             return Response({'error': f'Product with id {product_id} does not exist.'}, status=status.HTTP_404_NOT_FOUND)
 
     return Response({'message': 'Products deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['GET'])
+def get_product_detail(request,pk=None):
+    try: 
+        product = Product.objects.get(id=pk)
+    except product.DoesNotExist:
+        return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+    product_serializer = ProductSerializer(product)
+    
