@@ -92,6 +92,16 @@ class Store(models.Model):
         "Address", on_delete=models.CASCADE, null=True, blank=True)
 
 
+class CategoriesAdmin(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=generate_uuid, editable=False)
+    parent_category = models.ForeignKey(
+        'self', on_delete=models.CASCADE, blank=True, null=True)
+    image = models.ImageField(
+        upload_to='images/admin/categories/', null=True, blank=True)
+    name = models.CharField(max_length=255, unique=True)
+
+
 class ProductCategory(models.Model):
     id = models.UUIDField(
         primary_key=True, default=generate_uuid, editable=False)
@@ -99,9 +109,11 @@ class ProductCategory(models.Model):
         'self', on_delete=models.CASCADE, blank=True, null=True)
     category_name = models.CharField(max_length=255, unique=True)
     image = models.ImageField(
-        upload_to='images/categories/', null=True, blank=True)
+        upload_to='images/seller/categories/', null=True, blank=True)
     store = models.ForeignKey(
         Store, on_delete=models.CASCADE, null=True, blank=True)
+    admin = models.ForeignKey(
+        CategoriesAdmin, on_delete=models.CASCADE, null=True, blank=True)
 
 
 class Variations(models.Model):
@@ -131,7 +143,7 @@ class Product(models.Model):
     store = models.ForeignKey(
         Store, related_name='products', on_delete=models.CASCADE, null=True)
     image = models.ImageField(
-        upload_to="image/product/", null=True, blank=True)
+        upload_to="image/products/", null=True, blank=True)
     categories = models.ManyToManyField(
         ProductCategory, related_name='products')
 
@@ -141,7 +153,7 @@ class ProductImage(models.Model):
     product = models.ForeignKey(
         Product, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(
-        upload_to='images/products/', null=True, blank=True)
+        upload_to='images/products/side', null=True, blank=True)
     angle = models.CharField(max_length=255, null=True, blank=True)
 
 
@@ -287,4 +299,3 @@ class Favourite(models.Model):
         primary_key=True, default=generate_uuid, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-      

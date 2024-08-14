@@ -125,7 +125,7 @@ def post_product(request, pk=None):
         for image_data in product_images_data:
             if image_data.get('url'):
                 product_image_data = {
-                    'product': '9fec4cd5a5e643abb2483dde9fa1fbee',
+                    'product': product.id,
                     'image': image_data['url'],
                     'angle': image_data.get('angle', ''),
                 }
