@@ -56,14 +56,14 @@ INSTALLED_APPS = [
     'djoser',
     'social_django',
     'api.apps.ApiConfig',
-    'auth_app',               
-    'product_app',            
-    'order_app',                     
-    'shipping_app',            
-    'review_app',              
-    'search_app',              
-    'promotion_app',           
-    'admin_app',               
+    'auth_app',
+    'product_app',
+    'order_app',
+    'shipping_app',
+    'review_app',
+    'search_app',
+    'promotion_app',
+    'admin_app',
     'store',
 
 ]
@@ -184,9 +184,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ecommerce',
-        'USER': 'yan',
-        'PASSWORD': 'yan',
-        'HOST': '127.0.0.1',
+        'USER': 'root',
+        'PASSWORD': 'yan@1122334455',
+        'HOST': '54.254.220.59',
         'PORT': '3306'
     }
 }

@@ -51,8 +51,8 @@ class StoreAdmin(admin.ModelAdmin):
 
 @admin.register(ProductCategory)
 class ProductCategoryAdmin(admin.ModelAdmin):
-    list_display = ('category_name', 'store')
-    search_fields = ('category_name', 'store__name')
+    list_display = ('category_name', 'id')
+    search_fields = ('category_name', 'id')
 
 
 @admin.register(Variations)

@@ -91,17 +91,6 @@ class Store(models.Model):
     address = models.ForeignKey(
         "Address", on_delete=models.CASCADE, null=True, blank=True)
 
-
-class CategoriesAdmin(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
-    parent_category = models.ForeignKey(
-        'self', on_delete=models.CASCADE, blank=True, null=True)
-    image = models.ImageField(
-        upload_to='images/admin/categories/', null=True, blank=True)
-    name = models.CharField(max_length=255, unique=True)
-
-
 class ProductCategory(models.Model):
     id = models.UUIDField(
         primary_key=True, default=generate_uuid, editable=False)
@@ -110,10 +99,7 @@ class ProductCategory(models.Model):
     category_name = models.CharField(max_length=255, unique=True)
     image = models.ImageField(
         upload_to='images/seller/categories/', null=True, blank=True)
-    store = models.ForeignKey(
-        Store, on_delete=models.CASCADE, null=True, blank=True)
-    admin = models.ForeignKey(
-        CategoriesAdmin, on_delete=models.CASCADE, null=True, blank=True)
+
 
 
 class Variations(models.Model):
@@ -163,7 +149,6 @@ class ProductItem(models.Model):
         Product, related_name='variations', null=True, on_delete=models.CASCADE)
     variation_option = models.ForeignKey(
         VariationOption, related_name='product_variation', on_delete=models.CASCADE, null=True)
-
 
 class Stock(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

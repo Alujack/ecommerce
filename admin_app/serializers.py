@@ -1,10 +1,8 @@
 from rest_framework import serializers
-from base.models import CategoriesAdmin
+from base.models import ProductCategory
 
 
-class CategoriesAdminSerializer(serializers.ModelSerializer):
+class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = CategoriesAdmin
-        fields ="__all__"
-
-
+        model = ProductCategory
+        fields = '__all__'

@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import MyTokenObtainPairView, login
-
+from .views import *
 urlpatterns = [
-    path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('login/', login, name='login'),
+    path('create/categories/', category_management, name="category_management"),
+    path('create/categories/<str:pk>/',
+         category_management, name="category"),
 ]

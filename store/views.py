@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.urls import path
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -140,5 +141,13 @@ def get_product_detail(request, pk=None):
 
 
 @api_view(['GET'])
-def get_customerlist_by_store(request, pk=None):
-    store = Store.objects.get()
+def search_categories(request):
+    query = request.GET.get('q', '')
+    if query:
+        categories = ProductCategory.objects.filter(
+            Q(category_name__icontains=query) |
+            Q(image__icontains=query)
+        )
+        serializer = ProductCategorySerializer(categories, many=True)
+        return Response(serializer.data)
+    return Response({"message": "No query provided."})
