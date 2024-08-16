@@ -7,7 +7,6 @@ from .serializers import ProductSerializer, ProductCategorySerializer, Variation
 from django.shortcuts import get_object_or_404
 import json
 
-
 @api_view(['GET'])
 def get_product_by_id(request, pk=None):
 
@@ -83,9 +82,20 @@ def post_product(request, pk=None):
         product = get_object_or_404(Product, id=pk)
 
         # # Handle product items
-        product_items_data = data.get('product_items', [])
+        product_items_data = data.get('product_items')
+        if product_items_data:
+            product_items_data = json.loads(product_items_data)
+        product_items_datas = []
+        for key in request.data:
+            if key.startswith('product_items'):
+                index = key.split('[')[1].split(']')[0]
+                field = key.split('][')[1][:-1]
+                if len(product_items_data) <= int(index):
+                    product_items_datas.append({})
+                product_items_datas[int(index)][field] = request.data[key]
+            
 
-        for item_data in product_items_data:
+        for item_data in product_items_datas:
             variation_option_id = item_data['variation_option']
             if not variation_option_id:
                 return Response({"error": "Missing variation option ID."}, status=status.HTTP_400_BAD_REQUEST)
@@ -139,9 +149,21 @@ def post_product(request, pk=None):
                 print("No valid image file found in image_data")
 
         #  Handle stocks for each product item
-        stocks_data = data.get('stocks', [])
+        stocks_data = data.get('stocks')
+        if stocks_data:
+            stocks_data = json.loads(stocks_data)
 
-        for stock_data in stocks_data:
+        # Handle the files
+        stocks_datas = []
+        for key in request.data:
+            if key.startswith('stocks'):
+                index = key.split('[')[1].split(']')[0]
+                field = key.split('][')[1][:-1]
+                if len( stocks_data) <= int(index):
+                     stocks_datas.append({})
+                stocks_datas[int(index)][field] = request.data[key]
+
+        for stock_data in stocks_datas:
             product_item_variation = stock_data['product_item_variation']
 
             if not product_item_variation:
@@ -174,6 +196,7 @@ def post_product(request, pk=None):
     except Exception as e:
         print(f"Unexpected error: {str(e)}")
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 @api_view(['POST'])

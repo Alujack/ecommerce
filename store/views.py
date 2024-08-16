@@ -26,7 +26,6 @@ def store_view(request, pk=None):
             request.data['seller'] = pk
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-
         serializer = StoreSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

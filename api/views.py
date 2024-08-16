@@ -1,150 +1,137 @@
-# from rest_framework import viewsets
-# from base.models import (
-#     User, Stock, Store, CustomerList, Address, ProductCategory, Product, ProductItem, Variations,
-#     VariationOption, Promotion, PromotionCategory, OrderLine, ShoppingCartItem,
-#     PaymentType, UserPaymentMethod, UserReview, ShopOrder, OrderHistory, ShippingMethod, Favourite, Draft, Publish
-# )
-# from .serializers import (
-#     UserSerializer, StockSerializer, StoreSerializer, CustomerListSerializer, AddressSerializer,
-#     ProductCategorySerializer, ProductSerializer, ProductItemSerializer, VariationSerializer,
-#     VariationOptionSerializer, ProductConfigurationSerializer, PromotionSerializer,
-#     PromotionCategorySerializer, OrderLineSerializer, ShoppingCartItemSerializer,
-#     PaymentTypeSerializer, UserPaymentMethodSerializer, UserReviewSerializer, ShopOrderSerializer,
-#     OrderHistorySerializer, ShippingMethodSerializer, FavouriteSerializer, DraftSerializer, PublishSerializer
-# )
-# from django.http import JsonResponse
-# from django.views.decorators.csrf import csrf_exempt
-# import json
-# from base.models import User
-# from django.http import HttpResponse
+from rest_framework import viewsets
+from .models import (
+    User, CustomerList, Address, Store, ProductCategory, Variations,
+    VariationOption, Product, ProductImage, ProductItem, Stock, UserReview,
+    Draft, Publish, Promotion, PromotionCategory, ShoppingCartItem,
+    PaymentType, UserPaymentMethod, ShopOrder, OrderLine, OrderHistory,
+    ShippingMethod, Favourite
+)
+from .serializers import (
+    UserSerializer, CustomerListSerializer, AddressSerializer, StoreSerializer,
+    ProductCategorySerializer, VariationsSerializer, VariationOptionSerializer,
+    ProductSerializer, ProductImageSerializer, ProductItemSerializer,
+    StockSerializer, UserReviewSerializer, DraftSerializer, PublishSerializer,
+    PromotionSerializer, PromotionCategorySerializer, ShoppingCartItemSerializer,
+    PaymentTypeSerializer, UserPaymentMethodSerializer, ShopOrderSerializer,
+    OrderLineSerializer, OrderHistorySerializer, ShippingMethodSerializer,
+    FavouriteSerializer
+)
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 
-# @csrf_exempt
-# def create(request):
-#     if request.method == 'POST':
-#         email = request.POST['email']
-#         password = request.POST['password']
-#         users = User.objects.create(
-#             email=email, password_hash=password)
-#         users.save()
-#         return HttpResponse('success')
-#     return HttpResponse('fail')
-
-# class UserViewSet(viewsets.ModelViewSet):
-#     queryset = User.objects.all()
-#     serializer_class = UserSerializer
+class CustomerListViewSet(viewsets.ModelViewSet):
+    queryset = CustomerList.objects.all()
+    serializer_class = CustomerListSerializer
 
 
-# class StockViewSet(viewsets.ModelViewSet):
-#     queryset = Stock.objects.all()
-#     serializer_class = StockSerializer
+class AddressViewSet(viewsets.ModelViewSet):
+    queryset = Address.objects.all()
+    serializer_class = AddressSerializer
 
 
-# class StoreViewSet(viewsets.ModelViewSet):
-#     queryset = Store.objects.all()
-#     serializer_class = StoreSerializer
+class StoreViewSet(viewsets.ModelViewSet):
+    queryset = Store.objects.all()
+    serializer_class = StoreSerializer
 
 
-# class CustomerListViewSet(viewsets.ModelViewSet):
-#     queryset = CustomerList.objects.all()
-#     serializer_class = CustomerListSerializer
+class ProductCategoryViewSet(viewsets.ModelViewSet):
+    queryset = ProductCategory.objects.all()
+    serializer_class = ProductCategorySerializer
 
 
-# class AddressViewSet(viewsets.ModelViewSet):
-#     queryset = Address.objects.all()
-#     serializer_class = AddressSerializer
+class VariationsViewSet(viewsets.ModelViewSet):
+    queryset = Variations.objects.all()
+    serializer_class = VariationsSerializer
 
 
-# class ProductCategoryViewSet(viewsets.ModelViewSet):
-#     queryset = ProductCategory.objects.all()
-#     serializer_class = ProductCategorySerializer
+class VariationOptionViewSet(viewsets.ModelViewSet):
+    queryset = VariationOption.objects.all()
+    serializer_class = VariationOptionSerializer
 
 
-# class ProductViewSet(viewsets.ModelViewSet):
-#     queryset = Product.objects.all()
-#     serializer_class = ProductSerializer
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
 
-# class ProductItemViewSet(viewsets.ModelViewSet):
-#     queryset = ProductItem.objects.all()
-#     serializer_class = ProductItemSerializer
+class ProductImageViewSet(viewsets.ModelViewSet):
+    queryset = ProductImage.objects.all()
+    serializer_class = ProductImageSerializer
 
 
-# class VariationViewSet(viewsets.ModelViewSet):
-#     queryset = Variations.objects.all()
-#     serializer_class = VariationSerializer
+class ProductItemViewSet(viewsets.ModelViewSet):
+    queryset = ProductItem.objects.all()
+    serializer_class = ProductItemSerializer
 
 
-# class VariationOptionViewSet(viewsets.ModelViewSet):
-#     queryset = VariationOption.objects.all()
-#     serializer_class = VariationOptionSerializer
+class StockViewSet(viewsets.ModelViewSet):
+    queryset = Stock.objects.all()
+    serializer_class = StockSerializer
 
 
-# class ProductConfigurationViewSet(viewsets.ModelViewSet):
-#     queryset = ProductConfiguration.objects.all()
-#     serializer_class = ProductConfigurationSerializer
+class UserReviewViewSet(viewsets.ModelViewSet):
+    queryset = UserReview.objects.all()
+    serializer_class = UserReviewSerializer
 
 
-# class PromotionViewSet(viewsets.ModelViewSet):
-#     queryset = Promotion.objects.all()
-#     serializer_class = PromotionSerializer
+class DraftViewSet(viewsets.ModelViewSet):
+    queryset = Draft.objects.all()
+    serializer_class = DraftSerializer
 
 
-# class PromotionCategoryViewSet(viewsets.ModelViewSet):
-#     queryset = PromotionCategory.objects.all()
-#     serializer_class = PromotionCategorySerializer
+class PublishViewSet(viewsets.ModelViewSet):
+    queryset = Publish.objects.all()
+    serializer_class = PublishSerializer
 
 
-# class OrderLineViewSet(viewsets.ModelViewSet):
-#     queryset = OrderLine.objects.all()
-#     serializer_class = OrderLineSerializer
+class PromotionViewSet(viewsets.ModelViewSet):
+    queryset = Promotion.objects.all()
+    serializer_class = PromotionSerializer
 
 
-# class ShoppingCartItemViewSet(viewsets.ModelViewSet):
-#     queryset = ShoppingCartItem.objects.all()
-#     serializer_class = ShoppingCartItemSerializer
+class PromotionCategoryViewSet(viewsets.ModelViewSet):
+    queryset = PromotionCategory.objects.all()
+    serializer_class = PromotionCategorySerializer
 
 
-# class PaymentTypeViewSet(viewsets.ModelViewSet):
-#     queryset = PaymentType.objects.all()
-#     serializer_class = PaymentTypeSerializer
+class ShoppingCartItemViewSet(viewsets.ModelViewSet):
+    queryset = ShoppingCartItem.objects.all()
+    serializer_class = ShoppingCartItemSerializer
 
 
-# class UserPaymentMethodViewSet(viewsets.ModelViewSet):
-#     queryset = UserPaymentMethod.objects.all()
-#     serializer_class = UserPaymentMethodSerializer
+class PaymentTypeViewSet(viewsets.ModelViewSet):
+    queryset = PaymentType.objects.all()
+    serializer_class = PaymentTypeSerializer
 
 
-# class UserReviewViewSet(viewsets.ModelViewSet):
-#     queryset = UserReview.objects.all()
-#     serializer_class = UserReviewSerializer
+class UserPaymentMethodViewSet(viewsets.ModelViewSet):
+    queryset = UserPaymentMethod.objects.all()
+    serializer_class = UserPaymentMethodSerializer
 
 
-# class ShopOrderViewSet(viewsets.ModelViewSet):
-#     queryset = ShopOrder.objects.all()
-#     serializer_class = ShopOrderSerializer
+class ShopOrderViewSet(viewsets.ModelViewSet):
+    queryset = ShopOrder.objects.all()
+    serializer_class = ShopOrderSerializer
 
 
-# class OrderHistoryViewSet(viewsets.ModelViewSet):
-#     queryset = OrderHistory.objects.all()
-#     serializer_class = OrderHistorySerializer
+class OrderLineViewSet(viewsets.ModelViewSet):
+    queryset = OrderLine.objects.all()
+    serializer_class = OrderLineSerializer
 
 
-# class ShippingMethodViewSet(viewsets.ModelViewSet):
-#     queryset = ShippingMethod.objects.all()
-#     serializer_class = ShippingMethodSerializer
+class OrderHistoryViewSet(viewsets.ModelViewSet):
+    queryset = OrderHistory.objects.all()
+    serializer_class = OrderHistorySerializer
 
 
-# class FavouriteViewSet(viewsets.ModelViewSet):
-#     queryset = Favourite.objects.all()
-#     serializer_class = FavouriteSerializer
+class ShippingMethodViewSet(viewsets.ModelViewSet):
+    queryset = ShippingMethod.objects.all()
+    serializer_class = ShippingMethodSerializer
 
 
-# class DraftViewSet(viewsets.ModelViewSet):
-#     queryset = Draft.objects.all()
-#     serializer_class = DraftSerializer
-
-
-# class PublishViewSet(viewsets.ModelViewSet):
-#     queryset = Publish.objects.all()
-#     serializer_class = PublishSerializer
+class FavouriteViewSet(viewsets.ModelViewSet):
+    queryset = Favourite.objects.all()
+    serializer_class = FavouriteSerializer

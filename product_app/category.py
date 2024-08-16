@@ -21,7 +21,7 @@ def category_management(request, pk=None):
         return Response({'detail': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        categories = ProductCategory.objects.filter(store=store)
+        categories = ProductCategory.objects.all()
         if categories:
             serializer = ProductCategorySerializer(categories, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)

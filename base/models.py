@@ -90,6 +90,8 @@ class Store(models.Model):
     name = models.CharField(max_length=255)
     address = models.ForeignKey(
         "Address", on_delete=models.CASCADE, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    logo = models.ImageField(upload_to='stores/logos', null=True, blank=True)
 
 class ProductCategory(models.Model):
     id = models.UUIDField(
@@ -132,6 +134,8 @@ class Product(models.Model):
         upload_to="image/products/", null=True, blank=True)
     categories = models.ManyToManyField(
         ProductCategory, related_name='products')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class ProductImage(models.Model):
@@ -177,6 +181,7 @@ class Draft(models.Model):
         Store, on_delete=models.CASCADE, null=True, blank=True)
     product = models.OneToOneField(
         Product, on_delete=models.CASCADE, null=True, blank=True)
+    
 
 
 class Publish(models.Model):
@@ -186,6 +191,8 @@ class Publish(models.Model):
         Store, on_delete=models.CASCADE, null=True, blank=True)
     product = models.OneToOneField(
         Product, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Promotion(models.Model):
@@ -198,6 +205,8 @@ class Promotion(models.Model):
     end_date = models.DateField()
     categories = models.ManyToManyField(
         ProductCategory, through='PromotionCategory')
+    start_at = models.DateTimeField(auto_now_add=True)
+    end_at = models.DateTimeField()
 
 
 class PromotionCategory(models.Model):
@@ -205,16 +214,6 @@ class PromotionCategory(models.Model):
         primary_key=True, default=generate_uuid, editable=False)
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
     promotion = models.ForeignKey(Promotion, on_delete=models.CASCADE)
-
-
-class OrderLine(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
-    product_item = models.ForeignKey(ProductItem, on_delete=models.CASCADE)
-    order = models.ForeignKey('ShopOrder', on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-    price = models.PositiveIntegerField()
-
 
 class ShoppingCartItem(models.Model):
     id = models.UUIDField(
@@ -242,7 +241,6 @@ class UserPaymentMethod(models.Model):
     card_number = models.CharField(max_length=255)
     expiry_date = models.DateField()
 
-
 class ShopOrder(models.Model):
     id = models.UUIDField(
         primary_key=True, default=generate_uuid, editable=False)
@@ -264,6 +262,15 @@ class ShopOrder(models.Model):
     status = models.CharField(
         max_length=255, choices=STATUS, null=True, blank=True)
 
+class OrderLine(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=generate_uuid, editable=False)
+    product_item = models.ForeignKey(ProductItem, on_delete=models.CASCADE)
+    order = models.ForeignKey('ShopOrder', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    price = models.PositiveIntegerField()
+
+
 
 class OrderHistory(models.Model):
     id = models.UUIDField(
@@ -283,4 +290,4 @@ class Favourite(models.Model):
     id = models.UUIDField(
         primary_key=True, default=generate_uuid, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Publish, on_delete=models.CASCADE)

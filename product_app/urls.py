@@ -16,12 +16,12 @@ router.register(r'product-images', ProductImageViewSet)
 router.register(r'product-items', ProductItemViewSet)
 router.register(r'stocks', StockViewSet)
 
-urlpatterns = [
+urlpatterns = [ 
+    path('', include(router.urls)),
     path('category/', category_management, name="category-list"),
     path('category/<str:pk>/', category_management, name="category-list"),
     path('category/<str:pk>/detail/',
          get_one_category_and_create_detail_variations, name="category-list"),
-    path('', include(router.urls)),
     path('create/', create_product, name='product'),
     path('category/variations/<str:pk>/', get_variations_use_category,
          name='get_variation_use_category'),
