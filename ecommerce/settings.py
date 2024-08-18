@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'promotion_app',
     'admin_app',
     'store',
+    'inventory',
 
 ]
 MIDDLEWARE = [
@@ -150,7 +151,7 @@ DJOSER = {
 }
 
 AUTH_COOKIE = 'access'
-AUTH_COOKIE_MAX_AGE = 60 * 60 * 24
+AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30 * 12
 AUTH_COOKIE_SECURE = getenv('AUTH_COOKIE_SECURE', 'True') == 'True'
 AUTH_COOKIE_HTTP_ONLY = True
 AUTH_COOKIE_PATH = '/'
