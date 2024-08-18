@@ -14,7 +14,6 @@ from rest_framework_simplejwt.views import (
 )
 from rest_framework import viewsets
 from api.serializers import UserSerializer, AddressSerializer
-from base.models import User
 from rest_framework.decorators import api_view
 
 

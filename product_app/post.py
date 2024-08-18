@@ -2,8 +2,8 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from base.models import Product, ProductCategory, Variations, VariationOption, ProductItem, Stock, ProductImage, Publish, Draft
-from .serializers import ProductSerializer, ProductCategorySerializer, VariationsSerializer, VariationOptionSerializer, ProductItemSerializer, StockSerializer, ProductImageSerializer
+from base.models import Product, Category, Variations, VariationOption, Stock, ProductImage, Publish, Draft
+from .serializers import ProductSerializer, CategorySerializer, VariationsSerializer, VariationOptionSerializer, StockSerializer, ProductImageSerializer
 from django.shortcuts import get_object_or_404
 import json
 
@@ -22,7 +22,7 @@ def get_categories_by_product(request, pk=None):
     product = Product.objects.get(id=pk)
     try:
         categories = product.categories.all()
-        serializer = ProductCategorySerializer(categories, many=True)
+        serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     except product.DoesNotExist:
@@ -31,7 +31,7 @@ def get_categories_by_product(request, pk=None):
 
 @api_view(['GET'])
 def get_variations_by_category(request, pk=None):
-    category = ProductCategory.objects.get(id=pk)
+    category = Category.objects.get(id=pk)
     try:
         variations = Variations.objects.filter(category_id=category.id)
         serializer = VariationsSerializer(variations, many=True)
@@ -67,7 +67,7 @@ def get_variations_and_Options_id(request, pk=None):
         serialized_variations.append(variation_data)
 
         return Response(serialized_variations, status=status.HTTP_200_OK)
-    except ProductCategory.DoesNotExist:
+    except Category.DoesNotExist:
         return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -81,47 +81,13 @@ def post_product(request, pk=None):
         # # Retrieve the product by its ID
         product = get_object_or_404(Product, id=pk)
 
-        # # Handle product items
-        product_items_data = data.get('product_items')
-        if product_items_data:
-            product_items_data = json.loads(product_items_data)
-        product_items_datas = []
-        for key in request.data:
-            if key.startswith('product_items'):
-                index = key.split('[')[1].split(']')[0]
-                field = key.split('][')[1][:-1]
-                if len(product_items_data) <= int(index):
-                    product_items_datas.append({})
-                product_items_datas[int(index)][field] = request.data[key]
-            
-
-        for item_data in product_items_datas:
-            variation_option_id = item_data['variation_option']
-            if not variation_option_id:
-                return Response({"error": "Missing variation option ID."}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Fetch the VariationOption instance
-            variation_option = get_object_or_404(
-                VariationOption, id=variation_option_id)
-
-        #     # Create or retrieve the ProductItem
-            product_item, created = ProductItem.objects.get_or_create(
-                product=product,
-                variation_option=variation_option
-            )
-
-            if created:
-                print(f"ProductItem created: {product_item}")
-            else:
-                print(f"ProductItem already exists: {product_item}")
-
         # # Handle product images
         # Extract and parse the JSON data from the request
         product_image_data = data.get('product_images')
         if product_image_data:
             product_image_data = json.loads(product_image_data)
 
-        # Handle the files
+        # # Handle the files
         product_images_data = []
         for key in request.data:
             if key.startswith('product_images'):
@@ -131,7 +97,7 @@ def post_product(request, pk=None):
                     product_images_data.append({})
                 product_images_data[int(index)][field] = request.data[key]
 
-        # Handle the files
+        # # # # Handle the files
         for image_data in product_images_data:
             if image_data.get('url'):
                 product_image_data = {
@@ -149,38 +115,63 @@ def post_product(request, pk=None):
                 print("No valid image file found in image_data")
 
         #  Handle stocks for each product item
+
         stocks_data = data.get('stocks')
+
         if stocks_data:
             stocks_data = json.loads(stocks_data)
 
         # Handle the files
-        stocks_datas = []
-        for key in request.data:
+        stocks_data = {}
+
+
+        for key in data:
             if key.startswith('stocks'):
+                # Extract the index and field name
                 index = key.split('[')[1].split(']')[0]
                 field = key.split('][')[1][:-1]
-                if len( stocks_data) <= int(index):
-                     stocks_datas.append({})
-                stocks_datas[int(index)][field] = request.data[key]
 
-        for stock_data in stocks_datas:
-            product_item_variation = stock_data['product_item_variation']
+                # Convert index to an integer
+                index = int(index)
 
-            if not product_item_variation:
-                return Response({"error": "Missing product item variation data."}, status=status.HTTP_400_BAD_REQUEST)
+                # Initialize a dictionary for this index if it doesn't exist
+                if index not in stocks_data:
+                    stocks_data[index] = {}
 
-            # Fetch the correct ProductItem
-            product_item = ProductItem.objects.get(
-                product=product_item_variation['product'],
-                variation_option=product_item_variation['variation_option']
-            )
+                # Assign the value to the appropriate field
+                # Clean the key and value (removing any extra single quotes)
+                cleaned_key = field.strip("'")
+                cleaned_value = data[key].strip("'")
 
-            # Create Stock
-            stock = Stock.objects.create(
-                quantity=stock_data['quantity'],
-                product_item_variation=product_item,
-                store=product.store
-            )
+                stocks_data[index][cleaned_key] = cleaned_value
+
+        # Convert the stocks_data to a list for easier processing
+        stocks_list = [stocks_data[i] for i in sorted(stocks_data.keys())]
+
+        # Now you can process the stocks_list
+        for stock_data in stocks_list:
+    
+            variation_option = stock_data.get('variation_option')
+
+            if not variation_option:
+                return Response({"error": "Missing variation data."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Assuming VariationOption is a model you have
+            option = VariationOption.objects.get(id=variation_option)
+            stock = {
+                'product': product.id,
+                'variation_option': option.id,
+                'quantity': stock_data['quantity']
+            }
+
+            # Assuming StockSerializer is your serializer
+            serializer = StockSerializer(data=stock)
+            if serializer.is_valid():
+                serializer.save()
+                print('Created:', serializer.data)
+            else:
+                print('Error:', serializer.errors)
+
         publish = Publish.objects.update_or_create(
             product=product,
             store=product.store)
@@ -202,7 +193,7 @@ def post_product(request, pk=None):
 @api_view(['POST'])
 def publish_product(request, pk=None):
     product = get_object_or_404(Product, pk=pk)
-    print(request.store)  # Print the request data for debugging
+
 
     # Create a new Publish instance
     publish = Publish.objects.update_or_create(
@@ -217,8 +208,6 @@ def publish_product(request, pk=None):
 @api_view(['POST'])
 def draft_product(request, pk=None):
     product = get_object_or_404(Product, pk=pk)
-    print(request.store)  # Print the request data for debugging
-
     # Create a new Publish instance
     draft = Draft.objects.update_or_create(
         product=product,

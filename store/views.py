@@ -1,5 +1,4 @@
 from django.db.models import Q
-from django.urls import path
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -110,15 +109,11 @@ def get_product_detail(request, pk=None):
 
         # Get and serialize product categories
         categories = product.categories.all()
-        categories_data = ProductCategorySerializer(categories, many=True).data
+        categories_data = CategorySerializer(categories, many=True).data
 
         # Get and serialize product images
         images = ProductImage.objects.filter(product=product)
         images_data = ProductImageSerializer(images, many=True).data
-
-        # Get and serialize product variations
-        variations = ProductItem.objects.filter(product=product)
-        variations_data = ProductItemSerializer(variations, many=True).data
 
         # Get and serialize stock data
         stock = Stock.objects.filter(product_item_variation__product=product)
@@ -129,7 +124,6 @@ def get_product_detail(request, pk=None):
             "product": product_data,
             "categories": categories_data,
             "images": images_data,
-            "variations": variations_data,
             "stock": stock_data,
         }
 
@@ -143,10 +137,10 @@ def get_product_detail(request, pk=None):
 def search_categories(request):
     query = request.GET.get('q', '')
     if query:
-        categories = ProductCategory.objects.filter(
+        categories = Category.objects.filter(
             Q(category_name__icontains=query) |
             Q(image__icontains=query)
         )
-        serializer = ProductCategorySerializer(categories, many=True)
+        serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
     return Response({"message": "No query provided."})

@@ -1,18 +1,9 @@
-from rest_framework import generics
-from .serializers import ProductSerializer
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework import status
-from rest_framework.decorators import api_view, action
-from rest_framework.response import Response
+
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets
-from base.models import ProductCategory, Variations, VariationOption, Product, ProductImage, ProductItem, Stock
+from base.models import *
 from .serializers import *
 User = get_user_model()
-
-
-# Store Views
 
 
 class StoreViewSet(viewsets.ModelViewSet):
@@ -21,8 +12,8 @@ class StoreViewSet(viewsets.ModelViewSet):
 
 
 class ProductCategoryViewSet(viewsets.ModelViewSet):
-    queryset = ProductCategory.objects.all()
-    serializer_class = ProductCategorySerializer
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
 
 class VariationsViewSet(viewsets.ModelViewSet):
@@ -44,10 +35,6 @@ class ProductImageViewSet(viewsets.ModelViewSet):
     queryset = ProductImage.objects.all()
     serializer_class = ProductImageSerializer
 
-
-class ProductItemViewSet(viewsets.ModelViewSet):
-    queryset = ProductItem.objects.all()
-    serializer_class = ProductItemSerializer
 
 
 class StockViewSet(viewsets.ModelViewSet):

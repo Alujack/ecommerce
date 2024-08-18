@@ -1,17 +1,12 @@
-from rest_framework import generics
-from .serializers import ProductSerializer
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+
 from rest_framework import status
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from rest_framework import viewsets
-from base.models import ProductCategory, Variations, VariationOption, Product, ProductImage, ProductItem, Stock
+from base.models import *
 from .serializers import *
 
 User = get_user_model()
-
 
 @api_view(['GET', 'POST', 'DELETE'])
 def category_management(request, pk=None):
@@ -21,16 +16,16 @@ def category_management(request, pk=None):
         return Response({'detail': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        categories = ProductCategory.objects.all()
+        categories = Category.objects.all()
         if categories:
-            serializer = ProductCategorySerializer(categories, many=True)
+            serializer = CategorySerializer(categories, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'detail': 'No categories found'}, status=status.HTTP_404_NOT_FOUND)
 
     elif request.method == 'POST':
         category_data = request.data
         category_data['store'] = store.id  # Include store data
-        serializer = ProductCategorySerializer(data=category_data)
+        serializer = CategorySerializer(data=category_data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -38,10 +33,10 @@ def category_management(request, pk=None):
 
     elif request.method == 'DELETE':
         try:
-            category = ProductCategory.objects.get(id=pk)
+            category = Category.objects.get(id=pk)
             category.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except ProductCategory.DoesNotExist:
+        except Category.DoesNotExist:
             return Response({'detail': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -49,10 +44,10 @@ def category_management(request, pk=None):
 def get_one_category_and_create_detail_variations(request, pk=None):
     if request.method == 'GET':
         try:
-            category = ProductCategory.objects.get(pk=pk)
-            serializer = ProductCategorySerializer(category)
+            category = Category.objects.get(pk=pk)
+            serializer = CategorySerializer(category)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except ProductCategory.DoesNotExist:
+        except Category.DoesNotExist:
             return Response({'detail': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             print(f'Unexpected error: {e}')
@@ -60,7 +55,7 @@ def get_one_category_and_create_detail_variations(request, pk=None):
 
     elif request.method == 'POST':
         try:
-            category = ProductCategory.objects.get(pk=pk)
+            category = Category.objects.get(pk=pk)
             data = request.data
             attribute_type = data.get('attribute_type')
             options = data.get('options', [])
@@ -85,7 +80,7 @@ def get_one_category_and_create_detail_variations(request, pk=None):
 
             return Response({'detail': 'Variation options created successfully'}, status=status.HTTP_201_CREATED)
 
-        except ProductCategory.DoesNotExist:
+        except Category.DoesNotExist:
             return Response({'detail': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             print(f'Unexpected error: {e}')
@@ -95,7 +90,7 @@ def get_one_category_and_create_detail_variations(request, pk=None):
 @api_view(['GET'])
 def get_variations_use_category(request, pk=None):
     try:
-        category = ProductCategory.objects.get(id=pk)
+        category = Category.objects.get(id=pk)
         variations = Variations.objects.filter(category=category)
 
         # Create a list to hold the serialized variations with nested options
@@ -111,7 +106,7 @@ def get_variations_use_category(request, pk=None):
             serialized_variations.append(variation_data)
 
         return Response(serialized_variations, status=status.HTTP_200_OK)
-    except ProductCategory.DoesNotExist:
+    except Category.DoesNotExist:
         return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

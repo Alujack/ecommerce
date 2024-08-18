@@ -60,9 +60,9 @@ class StoreSerializer(serializers.ModelSerializer):
         instance.seller = validated_data.get('seller', instance.seller)
         instance.save()
         return instance
-class ProductCategorySerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = ProductCategory
+        model = Category
         fields = '__all__'
 
 
@@ -75,13 +75,6 @@ class ProductImageSerializer(serializers.ModelSerializer):
 class VariationOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationOption
-        fields = '__all__'
-
-
-class ProductItemSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = ProductItem
         fields = '__all__'
 
 

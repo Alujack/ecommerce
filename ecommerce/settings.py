@@ -181,13 +181,23 @@ CORS_ALLOW_CREDENTIALS = True
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'ecommerce',
+#         'USER': 'root',
+#         'PASSWORD': 'yan@1122334455',
+#         'HOST': '54.254.220.59',
+#         'PORT': '3306'
+#     }
+# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ecommerce',
-        'USER': 'root',
-        'PASSWORD': 'yan@1122334455',
-        'HOST': '54.254.220.59',
+        'USER': 'yan',
+        'PASSWORD': 'yan',
+        'HOST': '127.0.0.1',
         'PORT': '3306'
     }
 }

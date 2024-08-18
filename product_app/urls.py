@@ -13,7 +13,6 @@ router.register(r'variations', VariationsViewSet)
 router.register(r'variation-options', VariationOptionViewSet)
 router.register(r'products', ProductViewSet)
 router.register(r'product-images', ProductImageViewSet)
-router.register(r'product-items', ProductItemViewSet)
 router.register(r'stocks', StockViewSet)
 
 urlpatterns = [ 

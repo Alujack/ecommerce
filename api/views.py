@@ -1,21 +1,7 @@
 from rest_framework import viewsets
-from .models import (
-    User, CustomerList, Address, Store, ProductCategory, Variations,
-    VariationOption, Product, ProductImage, ProductItem, Stock, UserReview,
-    Draft, Publish, Promotion, PromotionCategory, ShoppingCartItem,
-    PaymentType, UserPaymentMethod, ShopOrder, OrderLine, OrderHistory,
-    ShippingMethod, Favourite
-)
-from .serializers import (
-    UserSerializer, CustomerListSerializer, AddressSerializer, StoreSerializer,
-    ProductCategorySerializer, VariationsSerializer, VariationOptionSerializer,
-    ProductSerializer, ProductImageSerializer, ProductItemSerializer,
-    StockSerializer, UserReviewSerializer, DraftSerializer, PublishSerializer,
-    PromotionSerializer, PromotionCategorySerializer, ShoppingCartItemSerializer,
-    PaymentTypeSerializer, UserPaymentMethodSerializer, ShopOrderSerializer,
-    OrderLineSerializer, OrderHistorySerializer, ShippingMethodSerializer,
-    FavouriteSerializer
-)
+from base.models import *
+from .serializers import *
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -37,8 +23,8 @@ class StoreViewSet(viewsets.ModelViewSet):
     serializer_class = StoreSerializer
 
 
-class ProductCategoryViewSet(viewsets.ModelViewSet):
-    queryset = ProductCategory.objects.all()
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
     serializer_class = ProductCategorySerializer
 
 
@@ -62,18 +48,13 @@ class ProductImageViewSet(viewsets.ModelViewSet):
     serializer_class = ProductImageSerializer
 
 
-class ProductItemViewSet(viewsets.ModelViewSet):
-    queryset = ProductItem.objects.all()
-    serializer_class = ProductItemSerializer
-
-
 class StockViewSet(viewsets.ModelViewSet):
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
 
 
 class UserReviewViewSet(viewsets.ModelViewSet):
-    queryset = UserReview.objects.all()
+    queryset = CustomerReview.objects.all()
     serializer_class = UserReviewSerializer
 
 
@@ -108,7 +89,7 @@ class PaymentTypeViewSet(viewsets.ModelViewSet):
 
 
 class UserPaymentMethodViewSet(viewsets.ModelViewSet):
-    queryset = UserPaymentMethod.objects.all()
+    queryset = PaymentMethod.objects.all()
     serializer_class = UserPaymentMethodSerializer
 
 

@@ -61,15 +61,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class CustomerList(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     store = models.ForeignKey('Store', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 class Address(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     house_number = models.CharField(max_length=255, null=True, blank=True)
     street_number = models.CharField(max_length=255, null=True, blank=True)
     village = models.CharField(max_length=255, null=True, blank=True)
@@ -93,9 +89,8 @@ class Store(models.Model):
     email = models.CharField(max_length=255, null=True, blank=True)
     logo = models.ImageField(upload_to='stores/logos', null=True, blank=True)
 
-class ProductCategory(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
+
+class Category(models.Model):
     parent_category = models.ForeignKey(
         'self', on_delete=models.CASCADE, blank=True, null=True)
     category_name = models.CharField(max_length=255, unique=True)
@@ -103,27 +98,21 @@ class ProductCategory(models.Model):
         upload_to='images/seller/categories/', null=True, blank=True)
 
 
-
 class Variations(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     category = models.ForeignKey(
-        ProductCategory, on_delete=models.CASCADE, null=True, blank=True)
+        Category, on_delete=models.CASCADE, null=True, blank=True)
     attribute_type = models.CharField(max_length=255, null=True, blank=True)
 
 
 class VariationOption(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     variation = models.ForeignKey(
         Variations, related_name='options', null=True, on_delete=models.CASCADE)
     value = models.CharField(max_length=255, null=True, blank=True)
 
 
 class Product(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product_id = models.CharField(
-        max_length=6, unique=True, null=True, blank=True)
+        max_length=6, null=True, blank=True)
     name = models.CharField(max_length=255)
     short_description = models.TextField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -133,13 +122,10 @@ class Product(models.Model):
     image = models.ImageField(
         upload_to="image/products/", null=True, blank=True)
     categories = models.ManyToManyField(
-        ProductCategory, related_name='products')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+        Category, related_name='products')
 
 
 class ProductImage(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.ForeignKey(
         Product, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(
@@ -147,52 +133,72 @@ class ProductImage(models.Model):
     angle = models.CharField(max_length=255, null=True, blank=True)
 
 
-class ProductItem(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    product = models.ForeignKey(
-        Product, related_name='variations', null=True, on_delete=models.CASCADE)
-    variation_option = models.ForeignKey(
-        VariationOption, related_name='product_variation', on_delete=models.CASCADE, null=True)
-
 class Stock(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    quantity = models.IntegerField()
-    product_item_variation = models.ForeignKey(
-        ProductItem, related_name='stock', null=True, on_delete=models.CASCADE)
-    store = models.ForeignKey(
-        Store, related_name='stock', on_delete=models.CASCADE, null=True)
-
-
-class UserReview(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, null=True, blank=True)
-    comment = models.TextField()
-    rating = models.PositiveIntegerField(null=True)
+    variation_option = models.ForeignKey(
+        VariationOption, on_delete=models.CASCADE, null=True, blank=True)
+    quantity = models.IntegerField()
+
+
+class TechnicalDetail(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='technical_details')
+    key = models.CharField(max_length=255)
+    value = models.CharField(max_length=1024)
+
+    def __str__(self):
+        return f"{self.key}: {self.value} for {self.product.title}"
+
+
+class ProductRecommendation(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='recommended_products')
+    recommended_product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='recommended_by')
+
+    def __str__(self):
+        return f"Recommendation: {self.recommended_product.title} for {self.product.title}"
+
+
+class Pricing(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='pricing_history')
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=10)
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Price: {self.price} {self.currency} for {self.product.title}"
+
+
+class CustomerReview(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='reviews')
+    customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    rating = models.IntegerField()
+    review_text = models.TextField()
+    review_date = models.DateTimeField(auto_now_add=True)
+    review_title = models.CharField(max_length=255, null=True, blank=True)
+    helpful_votes = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"Review by {self.customer.name} for {self.product.title}"
 
 
 class Draft(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     store = models.ForeignKey(
         Store, on_delete=models.CASCADE, null=True, blank=True)
     product = models.OneToOneField(
         Product, on_delete=models.CASCADE, null=True, blank=True)
-    
 
 
 class Publish(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     store = models.ForeignKey(
         Store, on_delete=models.CASCADE, null=True, blank=True)
     product = models.OneToOneField(
         Product, on_delete=models.CASCADE, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Promotion(models.Model):
@@ -204,57 +210,49 @@ class Promotion(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     categories = models.ManyToManyField(
-        ProductCategory, through='PromotionCategory')
-    start_at = models.DateTimeField(auto_now_add=True)
-    end_at = models.DateTimeField()
+        Category, through='PromotionCategory')
 
 
 class PromotionCategory(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
-    category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     promotion = models.ForeignKey(Promotion, on_delete=models.CASCADE)
 
+
 class ShoppingCartItem(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     customer = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True)
-    product_item = models.ForeignKey(ProductItem, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     qty = models.PositiveIntegerField()
 
 
 class PaymentType(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     type_value = models.CharField(max_length=255)
     # e.g., MasterCard, Visa, ABA, QR
 
 
-class UserPaymentMethod(models.Model):
+class PaymentMethod(models.Model):
     id = models.UUIDField(
         primary_key=True, default=generate_uuid, editable=False)
-    user = models.ForeignKey(
+    customer = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True)
     payment_type = models.ForeignKey(PaymentType, on_delete=models.CASCADE)
     provider = models.CharField(max_length=255)
     card_number = models.CharField(max_length=255)
     expiry_date = models.DateField()
 
+
 class ShopOrder(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     STATUS = [
         ('pending', 'pending'),
         ('processing', 'processing'),
         ('completed', 'completed'),
         ('delivered', 'delivered')
     ]
-    user = models.ForeignKey(
+    customer = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True)
     order_date = models.DateField(auto_now_add=True)
     payment_method = models.ForeignKey(
-        UserPaymentMethod, on_delete=models.CASCADE)
+        PaymentMethod, on_delete=models.CASCADE)
     shipping_address = models.CharField(max_length=255)
     shipping_method = models.ForeignKey(
         'ShippingMethod', on_delete=models.CASCADE, null=True, blank=True)
@@ -262,32 +260,46 @@ class ShopOrder(models.Model):
     status = models.CharField(
         max_length=255, choices=STATUS, null=True, blank=True)
 
+
 class OrderLine(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
-    product_item = models.ForeignKey(ProductItem, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     order = models.ForeignKey('ShopOrder', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     price = models.PositiveIntegerField()
 
 
-
 class OrderHistory(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     order = models.ForeignKey(OrderLine, on_delete=models.CASCADE)
 
 
 class ShippingMethod(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     name = models.CharField(max_length=255)
     price = models.FloatField()
 
 
 class Favourite(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Publish, on_delete=models.CASCADE)
+
+
+class Question(models.Model):
+    customer = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True)
+    question_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Question by {self.customer.name} on {self.product.title}"
+
+
+class Answer(models.Model):
+    question = models.OneToOneField(
+        Question, on_delete=models.CASCADE, related_name='answer')
+    answer_text = models.TextField()
+    # e.g., 'Seller', 'Customer'
+    answered_by = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Answer to {self.question}"

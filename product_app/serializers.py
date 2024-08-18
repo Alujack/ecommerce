@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from base.models import Store, ProductCategory, Variations, VariationOption, Product, ProductImage, ProductItem, Stock, Publish, Draft
+from base.models import Store, Category, Variations, VariationOption, Product, ProductImage, Stock, Publish, Draft
 
 
-class ProductCategorySerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = ProductCategory
+        model = Category
         fields = '__all__'
 
 
@@ -17,12 +17,6 @@ class VariationOptionSerializer(serializers.ModelSerializer):
 class VariationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Variations
-        fields = '__all__'
-
-
-class ProductItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductItem
         fields = '__all__'
 
 
@@ -46,7 +40,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
-    category = ProductCategorySerializer(many=True, read_only=True)
+    category = CategorySerializer(many=True, read_only=True)
     stock = StockSerializer(many=True,read_only=True)
     variations = VariationsSerializer(read_only=True)
 

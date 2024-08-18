@@ -1,26 +1,17 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import (
-    UserViewSet, CustomerListViewSet, AddressViewSet, StoreViewSet,
-    ProductCategoryViewSet, VariationsViewSet, VariationOptionViewSet,
-    ProductViewSet, ProductImageViewSet, ProductItemViewSet, StockViewSet,
-    UserReviewViewSet, DraftViewSet, PublishViewSet, PromotionViewSet,
-    PromotionCategoryViewSet, ShoppingCartItemViewSet, PaymentTypeViewSet,
-    UserPaymentMethodViewSet, ShopOrderViewSet, OrderLineViewSet,
-    OrderHistoryViewSet, ShippingMethodViewSet, FavouriteViewSet
-)
+from .views import *
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'customer-lists', CustomerListViewSet)
 router.register(r'addresses', AddressViewSet)
 router.register(r'stores', StoreViewSet)
-router.register(r'product-categories', ProductCategoryViewSet)
+router.register(r'product-categories', CategoryViewSet)
 router.register(r'variations', VariationsViewSet)
 router.register(r'variation-options', VariationOptionViewSet)
 router.register(r'products', ProductViewSet)
 router.register(r'product-images', ProductImageViewSet)
-router.register(r'product-items', ProductItemViewSet)
 router.register(r'stock', StockViewSet)
 router.register(r'user-reviews', UserReviewViewSet)
 router.register(r'drafts', DraftViewSet)

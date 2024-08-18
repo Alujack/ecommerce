@@ -1,15 +1,10 @@
-from rest_framework import generics
 from .serializers import ProductSerializer
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from rest_framework import viewsets
-from base.models import ProductCategory, Variations, VariationOption, Product, ProductImage, ProductItem, Stock
+from base.models import Category
 from .serializers import *
-from rest_framework.parsers import MultiPartParser, FormParser
 
 User = get_user_model()
 
@@ -17,8 +12,8 @@ User = get_user_model()
 @api_view(['GET'])
 def get_product_by_category(request, pk=None):
     try:
-        category = ProductCategory.objects.get(id=pk)
-    except ProductCategory.DoesNotExist:
+        category = Category.objects.get(id=pk)
+    except Category.DoesNotExist:
         return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
 
     products = Product.objects.filter(categories=category)
@@ -31,7 +26,7 @@ def get_product_by_category(request, pk=None):
 def get_product_by_store(request, pk=None):
     try:
         store = Store.objects.get(id=pk)
-    except ProductCategory.DoesNotExist:
+    except Category.DoesNotExist:
         return Response({"error": "Store not found"}, status=status.HTTP_404_NOT_FOUND)
     products = Product.objects.filter(store=store)
     serializer = ProductSerializer(products, many=True)

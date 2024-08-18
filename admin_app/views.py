@@ -1,11 +1,9 @@
-from rest_framework import generics
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from base.models import ProductCategory
+from base.models import Category
 from .serializers import ProductCategorySerializer
 
 User = get_user_model()
@@ -15,7 +13,7 @@ User = get_user_model()
 def category_management(request, pk=None):
 
     if request.method == 'GET':
-        categories = ProductCategory.objects.all()
+        categories = Category.objects.all()
         if categories:
             serializer = ProductCategorySerializer(categories, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -31,8 +29,8 @@ def category_management(request, pk=None):
 
     elif request.method == 'DELETE':
         try:
-            category = ProductCategory.objects.get(id=pk)
+            category = Category.objects.get(id=pk)
             category.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except ProductCategory.DoesNotExist:
+        except Category.DoesNotExist:
             return Response({'detail': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)

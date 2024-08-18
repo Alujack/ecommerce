@@ -1,16 +1,35 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from base.models import (
-    User, CustomerList, Address, Store, ProductCategory, Variations,
-    VariationOption, Product, ProductImage, ProductItem, Stock, UserReview,
-    Draft, Publish, Promotion, PromotionCategory, ShoppingCartItem,
-    PaymentType, UserPaymentMethod, ShopOrder, OrderLine, OrderHistory,
-    ShippingMethod, Favourite
-)
+from base.models import *
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+User = get_user_model()
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['id', 'email', 'password',
+                  'first_name', 'last_name',
+                  'phone_number', 'role',
+                  'image'
+                  ]
+        read_only_fields = ['email', 'password']
+
+    def create(self, validated_data):
+        user = User.objects.update_or_create(**validated_data)
+        return user
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['username'] = user.username
+        return token
+
+
 
 
 class CustomerListSerializer(serializers.ModelSerializer):
@@ -33,7 +52,7 @@ class StoreSerializer(serializers.ModelSerializer):
 
 class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = ProductCategory
+        model = Category
         fields = '__all__'
 
 
@@ -60,13 +79,6 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = ProductImage
         fields = '__all__'
 
-
-class ProductItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductItem
-        fields = '__all__'
-
-
 class StockSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stock
@@ -75,7 +87,7 @@ class StockSerializer(serializers.ModelSerializer):
 
 class UserReviewSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserReview
+        model = CustomerReview
         fields = '__all__'
 
 
@@ -117,7 +129,7 @@ class PaymentTypeSerializer(serializers.ModelSerializer):
 
 class UserPaymentMethodSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserPaymentMethod
+        model = PaymentMethod
         fields = '__all__'
 
 
