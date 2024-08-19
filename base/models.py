@@ -88,6 +88,7 @@ class Store(models.Model):
         "Address", on_delete=models.CASCADE, null=True, blank=True)
     email = models.CharField(max_length=255, null=True, blank=True)
     logo = models.ImageField(upload_to='stores/logos', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
 
 
 class Category(models.Model):
@@ -123,6 +124,7 @@ class Product(models.Model):
         upload_to="image/products/", null=True, blank=True)
     categories = models.ManyToManyField(
         Category, related_name='products')
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
 
 
 class ProductImage(models.Model):
@@ -131,6 +133,15 @@ class ProductImage(models.Model):
     image = models.ImageField(
         upload_to='images/products/side', null=True, blank=True)
     angle = models.CharField(max_length=255, null=True, blank=True)
+    # Store precomputed image features
+    features = models.JSONField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        # Extract features if image is new or updated
+        if self.image and not self.features:
+            from search_app.services.image_processing import extract_image_features
+            self.features = extract_image_features(self.image.path)
+        super().save(*args, **kwargs)
 
 
 class Stock(models.Model):
@@ -179,7 +190,7 @@ class CustomerReview(models.Model):
     customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     rating = models.IntegerField()
     review_text = models.TextField()
-    review_date = models.DateTimeField(auto_now_add=True)
+    review_date = models.DateTimeField(auto_now_add=True, null=False)
     review_title = models.CharField(max_length=255, null=True, blank=True)
     helpful_votes = models.IntegerField(default=0)
 
@@ -199,6 +210,7 @@ class Publish(models.Model):
         Store, on_delete=models.CASCADE, null=True, blank=True)
     product = models.OneToOneField(
         Product, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
 
 
 class Promotion(models.Model):
@@ -207,7 +219,7 @@ class Promotion(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     discount_percentage = models.PositiveIntegerField()
-    start_date = models.DateField()
+    start_date = models.DateField(auto_now_add=True, null=False)
     end_date = models.DateField()
     categories = models.ManyToManyField(
         Category, through='PromotionCategory')
@@ -259,6 +271,7 @@ class ShopOrder(models.Model):
     order_total = models.PositiveIntegerField()
     status = models.CharField(
         max_length=255, choices=STATUS, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
 
 
 class OrderLine(models.Model):
@@ -266,11 +279,13 @@ class OrderLine(models.Model):
     order = models.ForeignKey('ShopOrder', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     price = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
 
 
 class OrderHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     order = models.ForeignKey(OrderLine, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
 
 
 class ShippingMethod(models.Model):
@@ -281,13 +296,14 @@ class ShippingMethod(models.Model):
 class Favourite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Publish, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
 
 
 class Question(models.Model):
     customer = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True)
     question_text = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
 
     def __str__(self):
         return f"Question by {self.customer.name} on {self.product.title}"
@@ -299,7 +315,7 @@ class Answer(models.Model):
     answer_text = models.TextField()
     # e.g., 'Seller', 'Customer'
     answered_by = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=False)
 
     def __str__(self):
         return f"Answer to {self.question}"
