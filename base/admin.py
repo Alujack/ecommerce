@@ -1,11 +1,5 @@
 from django.contrib import admin
-from .models import (
-    User, CustomerList, Address, Store, Category, Variations, VariationOption, Product,
-    ProductImage, Stock, TechnicalDetail, ProductRecommendation, Pricing, CustomerReview,
-    Draft, Publish, Promotion, PromotionCategory, ShoppingCartItem, PaymentType,
-    PaymentMethod, ShopOrder, OrderLine, OrderHistory, ShippingMethod, Favourite, Question,
-    Answer
-)
+from .models import *
 
 # Register your models here.
 admin.site.register(User)
@@ -36,3 +30,5 @@ admin.site.register(ShippingMethod)
 admin.site.register(Favourite)
 admin.site.register(Question)
 admin.site.register(Answer)
+admin.site.register(CreditCard)
+admin.site.register(BankInformation)

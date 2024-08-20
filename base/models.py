@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.exceptions import ValidationError
 import uuid
 
 
@@ -94,7 +95,7 @@ class Store(models.Model):
 class Category(models.Model):
     parent_category = models.ForeignKey(
         'self', on_delete=models.CASCADE, blank=True, null=True)
-    category_name = models.CharField(max_length=255, unique=True)
+    category_name = models.CharField(max_length=255)
     image = models.ImageField(
         upload_to='images/seller/categories/', null=True, blank=True)
 
@@ -237,9 +238,34 @@ class ShoppingCartItem(models.Model):
     qty = models.PositiveIntegerField()
 
 
+class ShippingMethod(models.Model):
+    name = models.CharField(max_length=255)
+    price = models.FloatField()
+
+
 class PaymentType(models.Model):
     type_value = models.CharField(max_length=255)
-    # e.g., MasterCard, Visa, ABA, QR
+
+
+class CreditCard(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=generate_uuid, editable=False)
+    payment_type = models.ForeignKey(PaymentType, on_delete=models.CASCADE)
+    card_holder_name = models.CharField(max_length=255, null=False)
+    card_number = models.CharField(max_length=255, null=False)
+    expired_date = models.DateField(null=False)
+    cvv = models.CharField(max_length=10, null=False)
+
+
+class BankInformation(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=generate_uuid, editable=False)
+    payment_type = models.ForeignKey(PaymentType, on_delete=models.CASCADE)
+    acc_holder_name = models.CharField(max_length=255, null=False)
+    acc_number = models.CharField(max_length=255, null=False)
+    bank_name = models.CharField(max_length=255, null=False)
+    routing_number = models.CharField(max_length=10, null=False)
+    iban = models.CharField(max_length=10, null=False)
 
 
 class PaymentMethod(models.Model):
@@ -247,10 +273,24 @@ class PaymentMethod(models.Model):
         primary_key=True, default=generate_uuid, editable=False)
     customer = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True)
-    payment_type = models.ForeignKey(PaymentType, on_delete=models.CASCADE)
-    provider = models.CharField(max_length=255)
-    card_number = models.CharField(max_length=255)
-    expiry_date = models.DateField()
+    provider_card = models.OneToOneField(
+        CreditCard, on_delete=models.CASCADE, null=True, blank=True)
+    provider_bank = models.OneToOneField(
+        BankInformation, on_delete=models.CASCADE, null=True, blank=True)
+
+    def clean(self):
+        if self.provider_card and self.provider_bank:
+            raise ValidationError(
+                "A payment method cannot be linked to both a credit card and bank information."
+            )
+        if not self.provider_card and not self.provider_bank:
+            raise ValidationError(
+                "A payment method must be linked to either a credit card or bank information."
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
 
 class ShopOrder(models.Model):
@@ -286,11 +326,6 @@ class OrderHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     order = models.ForeignKey(OrderLine, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, null=False)
-
-
-class ShippingMethod(models.Model):
-    name = models.CharField(max_length=255)
-    price = models.FloatField()
 
 
 class Favourite(models.Model):

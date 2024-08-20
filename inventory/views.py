@@ -13,11 +13,9 @@ User = get_user_model()
 @api_view(['GET'])
 def get_parents_categories(request):
     try:
-        parent_categories = Category.objects.filter(parent_category=None)
-        serializers = CategorySerializers(data=parent_categories, many=True)
-        if serializers.is_valid():
-            return Response(serializers.data, status=status.HTTP_200_OK)
-        return Response(serializers.data, status=status.HTTP_404_NOT_FOUND)
+        parent_categories = Category.objects.all()
+        serializers = CategorySerializer(parent_categories, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
     except Category.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -27,7 +25,7 @@ def get_sub_categories(request):
     parent = request.query_params.get('parent')
     try:
         sub_categories = Category.objects.filter(parent_category=parent)
-        serializers = CategorySerializers(data=sub_categories, many=True)
+        serializers = CategorySerializer(data=sub_categories, many=True)
         if serializers.is_valid():
             return Response(serializers.data, status=status.HTTP_200_OK)
         return Response(serializers.data, status=status.HTTP_404_NOT_FOUND)
