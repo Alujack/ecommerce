@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import store_view, get_publish_by_store, get_draft_by_store, get_cutomers_by_store, get_product_detail, search_categories
+from .views import *
 urlpatterns = [
     path('manage/stores/', store_view, name='store_view'),
     path('manage/stores/<str:pk>/', store_view, name='store_view_update'),
@@ -9,5 +9,7 @@ urlpatterns = [
          get_draft_by_store, name="get_draft"),
     path('customer/list/<str:pk>/', get_cutomers_by_store, name="customer_list"),
     path('product/detail/<str:pk>/', get_product_detail, name="product_deatil"),
-    path('search/category/', search_categories, name="search_categories")
+    path('search/category/', search_categories, name="search_categories"),
+    path('category/save/<str:pk>/', save_store_category, name="save_category"),
+    path('category/save/<str:pk>', save_store_category, name="save_category"),
 ]

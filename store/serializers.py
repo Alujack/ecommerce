@@ -93,3 +93,8 @@ class CustomerListSerailizers(serializers.ModelSerializer):
     class Mata:
         models= CustomerList
         fields = '__all__'
+        
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Category
+        fields ='__all__'

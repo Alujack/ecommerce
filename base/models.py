@@ -100,6 +100,11 @@ class Category(models.Model):
         upload_to='images/seller/categories/', null=True, blank=True)
 
 
+class StoreCategory(models.Model):
+    categories = models.ForeignKey(Category, on_delete=models.CASCADE, null=False)
+    store =models.ForeignKey(Store, on_delete=models.CASCADE, null=False)
+
+
 class Variations(models.Model):
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE, null=True, blank=True)

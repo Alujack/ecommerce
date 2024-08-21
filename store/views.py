@@ -144,3 +144,36 @@ def search_categories(request):
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
     return Response({"message": "No query provided."})
+
+
+@api_view(['GET', 'POST'])
+def save_store_category(request, pk):
+    try:
+        store = Store.objects.get(id=pk)
+    except Store.DoesNotExist:
+        return Response({"error": "Store not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        store_categories = StoreCategory.objects.filter(store=store.id)
+        categories = []
+        for store_cat in store_categories:
+            category = Category.objects.get(id=store_cat.id)
+            categories.append(category)
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == 'POST':
+        category_id = request.query_params.get('category')
+        if not category_id:
+            return Response({"error": "Category ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            ins_category = Category.objects.get(id=category_id)
+        except Category.DoesNotExist:
+            return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        store_category = StoreCategory.objects.create(
+            categories=ins_category,
+            store=store
+        )
+        return Response({"message": "Category added to store"}, status=status.HTTP_201_CREATED)
