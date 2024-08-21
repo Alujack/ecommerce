@@ -142,12 +142,6 @@ class ProductImage(models.Model):
     # Store precomputed image features
     features = models.JSONField(null=True, blank=True)
 
-    def save(self, *args, **kwargs):
-        # Extract features if image is new or updated
-        if self.image and not self.features:
-            from search_app.services.image_processing import extract_image_features
-            self.features = extract_image_features(self.image.path)
-        super().save(*args, **kwargs)
 
 
 class Stock(models.Model):

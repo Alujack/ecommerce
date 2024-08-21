@@ -116,7 +116,7 @@ def get_product_detail(request, pk=None):
         images_data = ProductImageSerializer(images, many=True).data
 
         # Get and serialize stock data
-        stock = Stock.objects.filter(product_item_variation__product=product)
+        stock = Stock.objects.filter(product=product)
         stock_data = StockSerializer(stock, many=True).data
 
         # Combine all the data into one dictionary
@@ -157,7 +157,7 @@ def save_store_category(request, pk):
         store_categories = StoreCategory.objects.filter(store=store.id)
         categories = []
         for store_cat in store_categories:
-            category = Category.objects.get(id=store_cat.id)
+            category = Category.objects.get(id=store_cat.categories.id)
             categories.append(category)
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -172,7 +172,7 @@ def save_store_category(request, pk):
         except Category.DoesNotExist:
             return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        store_category = StoreCategory.objects.create(
+        store_category = StoreCategory.objects.update_or_create(
             categories=ins_category,
             store=store
         )
