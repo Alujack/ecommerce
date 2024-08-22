@@ -39,6 +39,8 @@ urlpatterns = [
     path('store/category/variations/options/get/<str:pk>/', get_variations_and_Options_id,
          name="get_options_and_variation_by_category"),
     path('store/product/publish/<str:pk>/', publish_product, name="publish"),
-    path('store/product/draft/<str:pk>/', draft_product, name="draft")
+    path('store/product/draft/<str:pk>/', draft_product, name="draft"),
+    path('category/productlist/<str:pk>/', get_product_by_category, name="prodductlist" )
+
 
 ]

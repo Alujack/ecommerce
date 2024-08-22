@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -16,19 +17,22 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = User.objects.update_or_create(**validated_data)
-        return user 
-    
+        return user
+
+
 class AddressSerializer(serializers.ModelSerializer):
     users = UserSerializer(read_only=True)
+
     class Meta:
         model = Address
         fields = '__all__'
+
 
 class CustomerListSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerList
         fields = '__all__'
-        
+
 
 class StoreSerializer(serializers.ModelSerializer):
     address = AddressSerializer()
@@ -60,6 +64,8 @@ class StoreSerializer(serializers.ModelSerializer):
         instance.seller = validated_data.get('seller', instance.seller)
         instance.save()
         return instance
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -69,7 +75,13 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
-        fields ='__all__'
+        fields = '__all__'
+
+
+class VariationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Variations
+        fields = '__all__'
 
 
 class VariationOptionSerializer(serializers.ModelSerializer):
@@ -89,12 +101,15 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+
+
 class CustomerListSerailizers(serializers.ModelSerializer):
     class Mata:
-        models= CustomerList
+        models = CustomerList
         fields = '__all__'
-        
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model=Category
-        fields ='__all__'
+        model = Category
+        fields = '__all__'

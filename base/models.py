@@ -101,8 +101,9 @@ class Category(models.Model):
 
 
 class StoreCategory(models.Model):
-    categories = models.ForeignKey(Category, on_delete=models.CASCADE, null=False)
-    store =models.ForeignKey(Store, on_delete=models.CASCADE, null=False)
+    categories = models.ForeignKey(
+        Category, on_delete=models.CASCADE, null=False)
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=False)
 
 
 class Variations(models.Model):
@@ -141,7 +142,6 @@ class ProductImage(models.Model):
     angle = models.CharField(max_length=255, null=True, blank=True)
     # Store precomputed image features
     features = models.JSONField(null=True, blank=True)
-
 
 
 class Stock(models.Model):
@@ -329,7 +329,7 @@ class OrderHistory(models.Model):
 
 class Favourite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    product = models.ForeignKey(Publish, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, null=False)
 
 

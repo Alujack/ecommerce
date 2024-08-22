@@ -20,3 +20,46 @@ def get_cart_items(request, pk):
         return Response(cart_item_list, status=status.HTTP_200_OK)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+
+@api_view(['POST'])
+def add_cart_items(request, pk):
+    try:
+        user = User.objects.get(id=pk)
+        product_id = request.query_params.get('productId')
+        qty = request.query_params.get('qty')
+        product = Product.objects.get(id=product_id)
+        cart_items = ShoppingCartItem.objects.update_or_create(
+            customer=user,
+            product=product,
+            qty=qty
+        )
+        return Response( status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+def add_favourite_items(request, pk):
+    try:
+        user = User.objects.get(id=pk)
+        product_id = request.query_params.get('productId')
+        product = Product.objects.get(id=product_id)
+        favourite = Favourite.objects.update_or_create(
+            user=user,
+            product=product,
+        )
+        return Response(status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+def get_favourite_items(request, pk):
+    try:
+        user = User.objects.get(id=pk)
+        products = Favourite.objects.filter(user=user)
+        serializers = FavouriteSerializer(products, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)

@@ -111,20 +111,45 @@ def get_product_detail(request, pk=None):
         categories = product.categories.all()
         categories_data = CategorySerializer(categories, many=True).data
 
+        # variation data
+
+        variations = Variations.objects.filter(category=categories[0].id)
+        # variation option with quantity from stock
+        variation_data_list = []
+        # Get and serialize stock data
+        for variation in variations:
+            options = VariationOption.objects.filter(variation=variation)
+            option_list = []
+            for option in options:
+                try:
+                    stock = Stock.objects.filter(
+                        product=product, variation_option_id=option.id).first()
+                    stock_data = StockSerializer(stock).data
+                    print(stock)
+                    option_list.append({
+                        'option': option.value,
+                        'stock': stock_data
+                    })
+                except Stock.DoesNotExist:
+                    option_list.append({
+                        'option': option.value,
+                        'stock': None
+                    })
+            variation_data_list.append({
+                'attribute_type': variation.attribute_type,
+                'options': option_list
+            })
+
         # Get and serialize product images
         images = ProductImage.objects.filter(product=product)
         images_data = ProductImageSerializer(images, many=True).data
-
-        # Get and serialize stock data
-        stock = Stock.objects.filter(product=product)
-        stock_data = StockSerializer(stock, many=True).data
 
         # Combine all the data into one dictionary
         response_data = {
             "product": product_data,
             "categories": categories_data,
+            "variations": variation_data_list,
             "images": images_data,
-            "stock": stock_data,
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
