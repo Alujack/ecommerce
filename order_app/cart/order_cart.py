@@ -20,7 +20,7 @@ def get_cart_items(request, pk):
         return Response(cart_item_list, status=status.HTTP_200_OK)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    
+
 
 @api_view(['POST'])
 def add_cart_items(request, pk):
@@ -34,7 +34,7 @@ def add_cart_items(request, pk):
             product=product,
             qty=qty
         )
-        return Response( status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -55,11 +55,43 @@ def add_favourite_items(request, pk):
 
 
 @api_view(['GET'])
-def get_favourite_items(request, pk):
+def get_favourite_items(request):
     try:
-        user = User.objects.get(id=pk)
-        products = Favourite.objects.filter(user=user)
-        serializers = FavouriteSerializer(products, many=True)
+        user = request.query_params.get('user')
+        favourites = Favourite.objects.filter(user=user)
+        product_list = []
+        for fav in favourites:
+            product = Product.objects.get(id=fav.product.id)
+            product_list.append(product)
+        serializers = ProductSerializer(product_list, many=True)
         return Response(serializers.data, status=status.HTTP_200_OK)
     except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+def delete_favourite(request):
+    try:
+        user = request.query_params.get('user')
+        product_id = request.query_params.get('productId')
+        fav = Favourite.objects.get(user=user, product=product_id)
+        if fav:
+            fav.delete()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    except Product.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+def delete_cart(request):
+    try:
+        user = request.query_params.get('user')
+        product_id = request.query_params.get('productId')
+        cart = ShoppingCartItem.objects.get(customer=user, product=product_id)
+        if cart:
+            cart.delete()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    except Product.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)

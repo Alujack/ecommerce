@@ -7,6 +7,7 @@ from base.models import *
 from .serializers import *
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import Count
 User = get_user_model()
 
 
@@ -63,7 +64,7 @@ def get_new_arrival_products(request):
 
     except Product.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    
+
 
 @api_view(['GET'])
 def get_new_arrival_products_in_category(request):
@@ -72,7 +73,8 @@ def get_new_arrival_products_in_category(request):
     print(hours_ago)
     try:
         # Filter products created within the last 2 hours
-        products = Product.objects.filter(created_at__gte=hours_ago , categories=category)
+        products = Product.objects.filter(
+            created_at__gte=hours_ago, categories=category)
 
         # Serialize the products
         serializer = ProductSerializer(products, many=True)
@@ -82,3 +84,57 @@ def get_new_arrival_products_in_category(request):
 
     except Product.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+# myself
+ 
+# @api_view(['GET'])
+# def get_cat_contain_product(request):
+#     # Get all categories
+#     categories = Category.objects.all()
+
+#     # Filter categories that contain products
+#     category_list = []
+#     for category in categories:
+#         if Product.objects.filter(categories=category).exists():
+#             category_list.append(category)
+
+#     # Serialize the category list
+#     serializer = CategorySerializer(category_list, many=True)
+
+#     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+#this is ai
+
+# @api_view(['GET'])
+# def get_cat_contain_product(request):
+#     # Select related products along with categories
+#     categories = Category.objects.filter(
+#         product__isnull=False).select_related('products').distinct()
+
+#     # Serialize the category list
+#     serializer = CategorySerializer(categories, many=True)
+
+#     return Response(serializer.data, status=status.HTTP_200_OK)
+
+# this ai 
+
+# @api_view(['GET'])
+# def get_cat_contain_product(request):
+#     # Annotate categories with the count of related products
+#     categories = Category.objects.annotate(
+#         product_count=Count('products')).filter(product_count__gt=0)
+
+#     # Serialize the category list
+#     serializer = CategorySerializer(categories, many=True)
+
+#     return Response(serializer.data, status=status.HTTP_200_OK)
+
+# this is me
+
+@api_view(['GET'])
+def get_cat_contain_product(request):
+    categories = Category.objects.prefetch_related(
+        'products').filter(products__isnull=False).distinct()
+    serializer = CategorySerializer(categories, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)

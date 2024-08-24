@@ -11,5 +11,7 @@ urlpatterns = [
          name="get_new_arrival_products"),
     path('category/new_arrival/', get_new_arrival_products_in_category,
          name="get_new_arrival_products_in_category"),
+    path('category/contain/products/', get_cat_contain_product,
+         name="get_cat_contain_product"),
 
 ]
