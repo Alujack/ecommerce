@@ -56,7 +56,6 @@ def process_payment(order):
 @api_view(['POST'])
 def create_order(request):
     data = request.data
-    print(data)
 
     try:
         # Extract customer, products, and shipping details
@@ -131,13 +130,9 @@ def create_order(request):
             payment_method=payment_method_ins,
             shipping_address=shipping_address,
             shipping_method=shipping_method,
-            order_total=order_total,  # Set the calculated order total
-            discount_amount=discount_amount  # Set the calculated discount amount
+            order_total=order_total,
+            discount_amount=discount_amount
         )
-
-        # Optionally, you can perform additional actions here, such as creating related OrderLines
-
-        # Create OrderLines
         for product in products:
             OrderLine.objects.create(
                 product_id=product['product'],

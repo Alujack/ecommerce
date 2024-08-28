@@ -108,9 +108,6 @@ def post_product(request, pk=None):
                 serializer = ProductImageSerializer(data=product_image_data)
                 if serializer.is_valid():
                     serializer.save()
-                    print(f"ProductImage created: {serializer.data}")
-                else:
-                    print(f"ProductImage creation failed: {serializer.errors}")
             else:
                 print("No valid image file found in image_data")
 
@@ -168,10 +165,7 @@ def post_product(request, pk=None):
             serializer = StockSerializer(data=stock)
             if serializer.is_valid():
                 serializer.save()
-                print('Created:', serializer.data)
-            else:
-                print('Error:', serializer.errors)
-
+            
         publish = Publish.objects.update_or_create(
             product=product,
             store=product.store)
