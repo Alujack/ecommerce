@@ -1,13 +1,6 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import *
-
-router = DefaultRouter()
-router.register(r'credit-cards', CreditCardViewSet)
-router.register(r'bank-information', BankInformationViewSet)
-router.register(r'payment-methods', PaymentMethodViewSet)
-router.register(r'checkout', CheckoutViewSet, basename='checkout')
+from django.urls import path
+from .views import create_order
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('create-order/def/', create_order, name='create_order'),
 ]

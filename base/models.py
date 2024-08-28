@@ -294,31 +294,67 @@ class PaymentMethod(models.Model):
 
 class ShopOrder(models.Model):
     STATUS = [
-        ('pending', 'pending'),
-        ('processing', 'processing'),
-        ('completed', 'completed'),
-        ('delivered', 'delivered')
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('completed', 'Completed'),
+        ('delivered', 'Delivered'),
+        ('canceled', 'Canceled'),
+        ('refunded', 'Refunded')
     ]
     customer = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True)
     order_date = models.DateField(auto_now_add=True)
-    payment_method = models.ForeignKey(
-        PaymentMethod, on_delete=models.CASCADE)
-    shipping_address = models.CharField(max_length=255)
+    payment_method = models.ForeignKey(PaymentMethod, on_delete=models.CASCADE)
+    shipping_address = models.ForeignKey(
+        Address, on_delete=models.CASCADE, null=True, blank=True)
     shipping_method = models.ForeignKey(
-        'ShippingMethod', on_delete=models.CASCADE, null=True, blank=True)
-    order_total = models.PositiveIntegerField()
+        ShippingMethod, on_delete=models.CASCADE, null=True, blank=True)
+    coupon = models.ForeignKey(
+        "Coupon", on_delete=models.SET_NULL, null=True, blank=True)
+    discount_amount = models.FloatField(default=0.0)
+    order_total = models.FloatField()
     status = models.CharField(
-        max_length=255, choices=STATUS, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=False)
+        max_length=255, choices=STATUS, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def calculate_total(self):
+        order_lines_total = sum(
+            line.line_total for line in self.orderline_set.all())
+
+        shipping_cost = self.shipping_method.price if self.shipping_method else 0
+
+        total_before_discount = order_lines_total + shipping_cost
+
+        if self.coupon and self.coupon.is_valid():
+            self.discount_amount = total_before_discount - \
+                self.coupon.apply_discount(total_before_discount)
+        else:
+            self.discount_amount = 0.0
+
+        self.order_total = total_before_discount - self.discount_amount
+
+    def save(self, *args, **kwargs):
+        # Save the instance first to generate a primary key
+        if not self.pk:
+            super().save(*args, **kwargs)
+    def __str__(self):
+        return f"Order #{self.id} by {self.customer.email}"
 
 
 class OrderLine(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    order = models.ForeignKey('ShopOrder', on_delete=models.CASCADE)
+    order = models.ForeignKey(ShopOrder, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
-    price = models.PositiveIntegerField()
-    created_at = models.DateTimeField(auto_now_add=True, null=False)
+    price = models.FloatField(null=False)
+    line_total = models.FloatField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        self.line_total = self.quantity * self.price
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.product.name} x {self.quantity}"
 
 
 class OrderHistory(models.Model):
@@ -353,3 +389,32 @@ class Answer(models.Model):
 
     def __str__(self):
         return f"Answer to {self.question}"
+
+
+class Coupon(models.Model):
+    code = models.CharField(max_length=50, unique=True)
+    discount_type = models.CharField(
+        max_length=10,
+        choices=[('fixed', 'Fixed Amount'), ('percent', 'Percentage')],
+        default='fixed'
+    )
+    discount_value = models.FloatField()
+    valid_from = models.DateTimeField()
+    valid_to = models.DateTimeField()
+    usage_limit = models.PositiveIntegerField(null=True, blank=True)
+    used_count = models.PositiveIntegerField(default=0)
+    active = models.BooleanField(default=True)
+
+    def is_valid(self):
+        from django.utils import timezone
+        now = timezone.now()
+        return self.active and self.valid_from <= now <= self.valid_to and (self.usage_limit is None or self.used_count < self.usage_limit)
+
+    def apply_discount(self, amount):
+        if self.discount_type == 'fixed':
+            return max(amount - self.discount_value, 0)
+        elif self.discount_type == 'percent':
+            return max(amount - (amount * (self.discount_value / 100)), 0)
+
+    def __str__(self):
+        return self.code

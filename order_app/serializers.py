@@ -27,4 +27,6 @@ class ShoppingCartItemSerializer(serializers.ModelSerializer):
 class FavouriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favourite
-        fields ='__all__'
+        fields = '__all__'
+
+
