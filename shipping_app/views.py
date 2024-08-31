@@ -2,8 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
-from base.models import ShopOrder, OrderLine, Address, PaymentMethod, PaymentType, CreditCard, BankInformation, ShippingMethod, Coupon, User
-from .serializers import ShopOrderSerializer, OrderLineSerializer
+from base.models import *
+from .serializers import *
 from django.core.exceptions import ValidationError
 from decimal import Decimal
 
@@ -134,11 +134,15 @@ def create_order(request):
             discount_amount=discount_amount
         )
         for product in products:
-            OrderLine.objects.create(
+            orderline = OrderLine.objects.create(
                 product_id=product['product'],
                 order=order,
                 quantity=product['quantity'],
                 price=product['price']
+            )
+            OrderHistory.objects.create(
+                user=customer,
+                order=orderline
             )
 
         # Process payment
@@ -146,6 +150,7 @@ def create_order(request):
 
         # Serialize the response
         serializer = ShopOrderSerializer(order)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     except ValidationError as e:

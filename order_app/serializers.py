@@ -30,3 +30,8 @@ class FavouriteSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class OrderHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderHistory
+        fields = '__all__'
+

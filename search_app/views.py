@@ -1,3 +1,8 @@
+from rest_framework import generics
+from .filters import ProductFilter
+from .serializers import ProductSerializer
+from base.models import Product
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
@@ -42,3 +47,10 @@ class UploadAndMatchImageView(APIView):
             })
         else:
             return Response({'error': 'No matching product found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ProductListView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
