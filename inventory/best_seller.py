@@ -11,7 +11,7 @@ User = get_user_model()
 
 def get_order_qty(product):
     """Returns the quantity of orders for a given product in the last month."""
-    one_month_ago = now() - timedelta(minutes=30)
+    one_month_ago = now() - timedelta(days=30)
     return OrderLine.objects.filter(product=product, created_at__gte=one_month_ago).count()
 
 
@@ -24,47 +24,83 @@ def get_score(total_orders_in_category, product_order_qty):
 
 @api_view(['GET'])
 def get_bestseller_in_cat(request):
-    categories = Category.objects.prefetch_related(
-        'products').filter(products__isnull=False).distinct()
+    category_id = request.query_params.get('category_id')
+    if category_id:
+        # Get best sellers for a specific category
+        try:
+            category = Category.objects.get(id=category_id)
+        except Category.DoesNotExist:
+            return Response({"detail": "Category not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    best_sellers = []
-
-    for cat in categories:
-        products = Product.objects.filter(categories=cat)
+        products = Product.objects.filter(categories=category)
         if not products.exists():
-            best_sellers.append({
-                'category': cat.category_name,
+            return Response({
+                'category': category.category_name,
                 'top_products': None
-            })
-            continue
+            }, status=status.HTTP_200_OK)
 
         order_qty_list = [(product, get_order_qty(product))
                           for product in products]
 
-        # Calculate total orders in this category
         total_orders_in_category = sum(
             order_qty for _, order_qty in order_qty_list)
 
-        # Calculate score for each product and filter out those with a score of 0
         scored_products = [
             (product, get_score(total_orders_in_category, order_qty))
             for product, order_qty in order_qty_list
         ]
         scored_products = [p for p in scored_products if p[1] > 0]
 
-        # Sort products by their score in descending order
         scored_products.sort(key=lambda x: x[1], reverse=True)
 
-        # Get the top 10 products or less if there are fewer than 10
         top_products = scored_products[:10]
 
-        # Serialize the top products
         top_products_serialized = ProductSerializer(
             [product for product, _ in top_products], many=True).data
 
-        best_sellers.append({
-            'category': cat.category_name,
+        return Response({
+            'category': category.category_name,
             'top_products': top_products_serialized if top_products_serialized else None
-        })
+        }, status=status.HTTP_200_OK)
 
-    return Response(best_sellers, status=status.HTTP_200_OK)
+    else:
+        # Get best sellers for all categories
+        categories = Category.objects.prefetch_related(
+            'products').filter(products__isnull=False).distinct()
+
+        best_sellers = []
+
+        for cat in categories:
+            products = Product.objects.filter(categories=cat)
+            if not products.exists():
+                best_sellers.append({
+                    'category': cat.category_name,
+                    'top_products': None
+                })
+                continue
+
+            order_qty_list = [(product, get_order_qty(product))
+                              for product in products]
+
+            total_orders_in_category = sum(
+                order_qty for _, order_qty in order_qty_list)
+
+            scored_products = [
+                (product, get_score(total_orders_in_category, order_qty))
+                for product, order_qty in order_qty_list
+            ]
+            scored_products = [p for p in scored_products if p[1] > 0]
+
+            scored_products.sort(key=lambda x: x[1], reverse=True)
+
+            top_products = scored_products[:10]
+
+            top_products_serialized = ProductSerializer(
+                [product for product, _ in top_products], many=True).data
+
+            best_sellers.append({
+                'category': cat.category_name,
+                'top_products': top_products_serialized if top_products_serialized else None
+            })
+
+        return Response(best_sellers, status=status.HTTP_200_OK)
