@@ -7,6 +7,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 from rest_framework import status
+from rest_framework.decorators import api_view
+from django.db.models import Q
+
 
 from base.models import ProductImage
 from product_app.serializers import ProductImageSerializer
@@ -54,3 +57,32 @@ class ProductListView(generics.ListAPIView):
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProductFilter
+
+
+@api_view(['GET'])
+def search_products(request):
+    query = request.GET.get('q', None)
+    products_starting_with_name = Product.objects.none()
+    products_containing_query = Product.objects.none()
+
+    if query:
+        # Step 1: Products where name starts with the query
+        products_starting_with_name = Product.objects.filter(
+            name__istartswith=query)
+
+        # Step 2: Products where name, short_description, or description contains the query
+        products_containing_query = Product.objects.filter(
+            Q(name__icontains=query) |
+            Q(short_description__icontains=query) |
+            Q(description__icontains=query)
+        ).exclude(id__in=products_starting_with_name.values('id'))
+
+    # Combine both querysets
+    products = products_starting_with_name | products_containing_query
+
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
+@api_view(['GET'])
+def product_relate(request, pk):
+    cat = Product.objects.filter(                 )
+
