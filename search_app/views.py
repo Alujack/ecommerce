@@ -82,7 +82,11 @@ def search_products(request):
 
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
+
+
 @api_view(['GET'])
 def product_relate(request, pk):
-    cat = Product.objects.filter(                 )
-
+    cat = Product.objects.get(id=pk).categories.first()
+    products = Product.objects.filter(categories=cat)
+    serializers = ProductSerializer(products, many=True)
+    return Response(serializers.data, status=status.HTTP_200_OK)

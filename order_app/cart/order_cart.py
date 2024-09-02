@@ -28,15 +28,34 @@ def add_cart_items(request, pk):
         user = User.objects.get(id=pk)
         product_id = request.query_params.get('productId')
         qty = request.query_params.get('qty')
+
+        if not product_id or not qty:
+            return Response({"error": "Product ID and quantity are required."}, status=status.HTTP_400_BAD_REQUEST)
+
         product = Product.objects.get(id=product_id)
-        cart_items = ShoppingCartItem.objects.update_or_create(
+
+        # Update or create the cart item based on customer and product
+        cart_item, created = ShoppingCartItem.objects.update_or_create(
             customer=user,
             product=product,
-            qty=qty
+            defaults={'qty': qty}
         )
+
+        if not created:
+            # If the item already existed, just update the quantity
+            cart_item.qty = int(qty)
+            cart_item.save()
+
         return Response(status=status.HTTP_200_OK)
+
     except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    except Product.DoesNotExist:
+        return Response({"error": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -89,6 +108,19 @@ def delete_cart(request):
         user = request.query_params.get('user')
         product_id = request.query_params.get('productId')
         cart = ShoppingCartItem.objects.get(customer=user, product=product_id)
+        if cart:
+            cart.delete()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    except Product.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+def delete_all_cart(request):
+    try:
+        user = request.query_params.get('user')
+        cart = ShoppingCartItem.objects.filter(customer=user)
         if cart:
             cart.delete()
             return Response(status=status.HTTP_202_ACCEPTED)
