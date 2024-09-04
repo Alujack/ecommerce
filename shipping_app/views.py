@@ -60,6 +60,7 @@ def create_order(request):
     try:
         # Extract customer, products, and shipping details
         customer = data.get('customer')
+        store_id = data.get('store')
         products = data.get('order_lines')
         shipping_address_data = data.get('shipping_address')
         shipping_method_id = data.get('shipping_method')
@@ -147,6 +148,14 @@ def create_order(request):
 
         # Process payment
         process_payment(order)
+        for store_id in store_id:
+            print(store_id.get('store'))
+            store = Store.objects.get(id=store_id.get('store'))
+            customer = customerOrder.objects.create(
+                customer=customer,
+                store=store,
+                order=order
+            )
 
         # Serialize the response
         serializer = ShopOrderSerializer(order)

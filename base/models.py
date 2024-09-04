@@ -92,6 +92,15 @@ class Store(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=False)
 
 
+class customerOrder(models.Model):
+    customer = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True)
+    store = models.ForeignKey(
+        Store, on_delete=models.CASCADE, null=True, blank=True)
+    order = models.ForeignKey(
+        'ShopOrder', on_delete=models.CASCADE, null=True, blank=True)
+
+
 class Category(models.Model):
     parent_category = models.ForeignKey(
         'self', on_delete=models.CASCADE, blank=True, null=True)
@@ -337,6 +346,7 @@ class ShopOrder(models.Model):
         # Save the instance first to generate a primary key
         if not self.pk:
             super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Order #{self.id} by {self.customer.email}"
 

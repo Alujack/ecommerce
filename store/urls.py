@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import *
+from .customer_order import *
 urlpatterns = [
     path('manage/stores/', store_view, name='store_view'),
     path('manage/stores/<str:pk>/', store_view, name='store_view_update'),
@@ -12,4 +13,5 @@ urlpatterns = [
     path('search/category/', search_categories, name="search_categories"),
     path('category/save/<str:pk>/', save_store_category, name="save_category"),
     path('category/save/<str:pk>', save_store_category, name="save_category"),
+    path('customer/order-list', get_order_line, name="get_order_line"),
 ]

@@ -113,3 +113,14 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
+
+
+class CustomerOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = customerOrder
+        fields = '__all__'
+
+class ShopOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=ShopOrder
+        fields='__all__'
