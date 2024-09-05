@@ -149,7 +149,6 @@ class ProductImage(models.Model):
     image = models.ImageField(
         upload_to='images/products/side', null=True, blank=True)
     angle = models.CharField(max_length=255, null=True, blank=True)
-    # Store precomputed image features
     features = models.JSONField(null=True, blank=True)
 
 
@@ -223,8 +222,6 @@ class Publish(models.Model):
 
 
 class Promotion(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     name = models.CharField(max_length=255)
     description = models.TextField()
     discount_percentage = models.PositiveIntegerField()
@@ -256,8 +253,6 @@ class PaymentType(models.Model):
 
 
 class CreditCard(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     payment_type = models.ForeignKey(PaymentType, on_delete=models.CASCADE)
     card_holder_name = models.CharField(max_length=255, null=False)
     card_number = models.CharField(max_length=255, null=False)
@@ -266,8 +261,6 @@ class CreditCard(models.Model):
 
 
 class BankInformation(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     payment_type = models.ForeignKey(PaymentType, on_delete=models.CASCADE)
     acc_holder_name = models.CharField(max_length=255, null=False)
     acc_number = models.CharField(max_length=255, null=False)
@@ -277,8 +270,6 @@ class BankInformation(models.Model):
 
 
 class PaymentMethod(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=generate_uuid, editable=False)
     customer = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True)
     provider_card = models.OneToOneField(

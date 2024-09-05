@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from base.models import Category
 from .serializers import *
-
+from django.db.models import Sum
 User = get_user_model()
 
 
@@ -23,14 +23,39 @@ def get_product_by_category(request, pk=None):
 
 
 @api_view(['GET'])
-def get_product_by_store(request, pk=None):
+def get_products_by_store(request, pk=None):
     try:
         store = Store.objects.get(id=pk)
-    except Category.DoesNotExist:
+    except Store.DoesNotExist:
         return Response({"error": "Store not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Fetch products for the store
     products = Product.objects.filter(store=store)
-    serializer = ProductSerializer(products, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+
+    if not products.exists():
+        return Response({"error": "No products found for this store"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Create a list to store the product data
+    products_data = []
+
+    for product in products:
+        # Aggregate total stock quantity for each product
+        total_stock_quantity = Stock.objects.filter(product=product).aggregate(
+            total_quantity=Sum('quantity'))['total_quantity'] or 0
+
+        # Append product data with total stock quantity
+        products_data.append({
+            "id": product.id,
+            "product_id": product.product_id,
+            "name": product.name,
+            "short_description": product.short_description,
+            "description": product.description,
+            "price": product.price,
+            "image": product.image.url if product.image else None,
+            "total_stock_quantity": total_stock_quantity
+        })
+
+    return Response(products_data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -65,11 +90,11 @@ def delete_product(request):
 
     return Response({'message': 'Products deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
 
+
 @api_view(['GET'])
-def get_product_detail(request,pk=None):
-    try: 
+def get_product_detail(request, pk=None):
+    try:
         product = Product.objects.get(id=pk)
     except product.DoesNotExist:
         return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
     product_serializer = ProductSerializer(product)
-    

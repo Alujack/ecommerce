@@ -14,4 +14,5 @@ urlpatterns = [
     path('category/save/<str:pk>/', save_store_category, name="save_category"),
     path('category/save/<str:pk>', save_store_category, name="save_category"),
     path('customer/order-list', get_order_line, name="get_order_line"),
+    path('product/order-list', get_store_orders, name="get_product"),
 ]

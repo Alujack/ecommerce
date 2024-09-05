@@ -120,7 +120,14 @@ class CustomerOrderSerializer(serializers.ModelSerializer):
         model = customerOrder
         fields = '__all__'
 
+
 class ShopOrderSerializer(serializers.ModelSerializer):
     class Meta:
-        model=ShopOrder
-        fields='__all__'
+        model = ShopOrder
+        fields = '__all__'
+
+
+class OrderLineSerailizer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderLine
+        fields = '__all__'

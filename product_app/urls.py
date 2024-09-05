@@ -26,7 +26,7 @@ urlpatterns = [
          name='get_variation_use_category'),
     path('category/product/<str:pk>/',
          get_product_by_category, name='get_product'),
-    path('store/<str:pk>/product/', get_product_by_store, name="product_in_store"),
+    path('store/<str:pk>/product/', get_products_by_store, name="product_in_store"),
     path('store/product/delete/', delete_product, name="delete_product"),
     path('store/product/post/<str:pk>/',  post_product, name="post_product"),
     path('store/product/get/<str:pk>/', get_product_by_id, name="product_get"),

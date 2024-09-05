@@ -59,3 +59,12 @@ class DraftSerializer(serializers.ModelSerializer):
     class Meta:
         model = Draft
         fields = '__all__'
+
+
+class ProductWithStockSerializer(serializers.ModelSerializer):
+    stock = StockSerializer(many=True, source='stock_set', read_only=True)
+
+    class Meta:
+        model = Product
+        fields = ['product_id', 'name', 'short_description',
+                  'description', 'price', 'categories', 'image', 'stock']
