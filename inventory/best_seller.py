@@ -104,3 +104,42 @@ def get_bestseller_in_cat(request):
             })
 
         return Response(best_sellers, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_bestsellers(request):
+    # Fetch all products
+    products = Product.objects.all()
+
+    # If there are no products, return an empty response
+    if not products.exists():
+        return Response({"detail": "No products found."}, status=status.HTTP_200_OK)
+
+    # List to hold (product, order_qty) tuples
+    order_qty_list = [(product, get_order_qty(product))
+                      for product in products]
+
+    # Sum the total number of orders across all products
+    total_orders = sum(order_qty for _, order_qty in order_qty_list)
+
+    # Calculate scores for each product based on the total orders
+    scored_products = [
+        (product, get_score(total_orders, order_qty))
+        for product, order_qty in order_qty_list
+    ]
+
+    # Filter out products with a score of 0
+    scored_products = [p for p in scored_products if p[1] > 0]
+
+    # Sort products by their score in descending order
+    scored_products.sort(key=lambda x: x[1], reverse=True)
+
+    # Limit to the top 10 best-selling products (or any number you prefer)
+    top_products = scored_products[:10]
+
+    # Serialize the top products
+    top_products_serialized = ProductSerializer(
+        [product for product, _ in top_products], many=True).data
+
+    # Return the top products
+    return Response(top_products_serialized if top_products_serialized else None, status=status.HTTP_200_OK)

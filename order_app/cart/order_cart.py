@@ -62,15 +62,24 @@ def add_cart_items(request, pk):
 def add_favourite_items(request, pk):
     try:
         user = User.objects.get(id=pk)
+        # Use query_params to get the productId from the URL
         product_id = request.query_params.get('productId')
+        if product_id is None:
+            return Response({'detail': 'Product ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
         product = Product.objects.get(id=product_id)
         favourite = Favourite.objects.update_or_create(
             user=user,
             product=product,
         )
         return Response(status=status.HTTP_200_OK)
+
     except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Product.DoesNotExist:
+        return Response({'detail': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])

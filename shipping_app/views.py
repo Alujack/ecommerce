@@ -59,14 +59,14 @@ def create_order(request):
 
     try:
         # Extract customer, products, and shipping details
-        customer = data.get('customer')
+        customer_id = data.get('customer')
         store_id = data.get('store')
         products = data.get('order_lines')
         shipping_address_data = data.get('shipping_address')
         shipping_method_id = data.get('shipping_method')
         coupon_code = data.get('coupon_code')
         payment_type = data.get('payment_type')
-        customer = User.objects.get(id=customer)
+        customer = User.objects.get(id=customer_id)
 
         # Handle Shipping Address Creation
         shipping_address = Address.objects.create(
@@ -141,7 +141,7 @@ def create_order(request):
                 quantity=product['quantity'],
                 price=product['price']
             )
-            OrderHistory.objects.create(
+            OrderHistory.objects.update_or_create(
                 user=customer,
                 order=orderline
             )

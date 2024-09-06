@@ -31,32 +31,6 @@ def get_order_line(request):
     }
     return Response(data, status=status.HTTP_200_OK)
 
-
-# @api_view(['GET'])
-# def get_order_product(request):
-#     store_id = request.query_params.get('store')
-#     store = Store.objects.get(id=store_id)
-#     product_in_store = Product.objects.filter(store_id=store.id)
-
-#     order_line_list = []
-#     shop_order_list = []
-
-#     for product in product_in_store:
-#         order_lines = OrderLine.objects.filter(product_id=product.id)
-#         order_line_list.extend(order_lines)  # Collect individual order lines
-
-#         for order_line in order_lines:
-#             shop_order = order_line.order
-#             shop_order_list.append(shop_order)
-
-#     data = {
-#         # Ensure this is a flat list
-#         'order_line': OrderLineSerailizer(order_line_list, many=True).data,
-#         # Ensure this is a flat list
-#         'shop_order': ShopOrderSerializer(shop_order_list, many=True).data
-#     }
-
-#     return Response(data, status=status.HTTP_200_OK)
 @api_view(['GET'])
 def get_store_orders(request):
     store_id = request.query_params.get('store')
@@ -92,3 +66,4 @@ def get_store_orders(request):
 
     # Return the aggregated data
     return Response(orders_data, status=status.HTTP_200_OK)
+

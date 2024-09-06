@@ -1,4 +1,4 @@
-
+from django.db.models import Prefetch
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -86,7 +86,7 @@ def get_new_arrival_products_in_category(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 # myself
- 
+
 # @api_view(['GET'])
 # def get_cat_contain_product(request):
 #     # Get all categories
@@ -104,7 +104,7 @@ def get_new_arrival_products_in_category(request):
 #     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-#this is ai
+# this is ai
 
 # @api_view(['GET'])
 # def get_cat_contain_product(request):
@@ -117,7 +117,7 @@ def get_new_arrival_products_in_category(request):
 
 #     return Response(serializer.data, status=status.HTTP_200_OK)
 
-# this ai 
+# this ai
 
 # @api_view(['GET'])
 # def get_cat_contain_product(request):
@@ -138,3 +138,29 @@ def get_cat_contain_product(request):
         'products').filter(products__isnull=False).distinct()
     serializer = CategorySerializer(categories, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_category_products(request):
+    # Fetch only categories that have products
+    categories = Category.objects.prefetch_related(
+        Prefetch(
+            'products',
+            # Limit to 10 products per category
+            queryset=Product.objects.order_by('-created_at')[:10],
+            to_attr='limited_products'
+        )
+    ).filter(products__isnull=False).distinct()
+
+    # Prepare the response data
+    response_data = []
+    for category in categories:
+        if category.limited_products:  # Only include categories with products
+            serialized_products = ProductSerializer(
+                category.limited_products, many=True).data
+            response_data.append({
+                'category': category.category_name,
+                'products': serialized_products
+            })
+
+    return Response(response_data, status=200)
