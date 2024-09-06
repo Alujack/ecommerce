@@ -69,7 +69,7 @@ def create_order(request):
         customer = User.objects.get(id=customer)
 
         # Handle Shipping Address Creation
-        shipping_address, created = Address.objects.update_or_create(
+        shipping_address = Address.objects.create(
             house_number=shipping_address_data.get('house_number'),
             street_number=shipping_address_data.get('street_number'),
             village=shipping_address_data.get('village'),
