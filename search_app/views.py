@@ -46,3 +46,23 @@ def product_relate(request, pk):
     products = Product.objects.filter(categories=cat)
     serializers = ProductSerializer(products, many=True)
     return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_filter_products(request):
+    # Get the min and max price from query parameters
+    min_price = request.query_params.get('min_price', None)
+    max_price = request.query_params.get('max_price', None)
+
+    # Filter products based on price range
+    products = Product.objects.all()
+
+    if min_price is not None:
+        products = products.filter(price__gte=min_price)
+
+    if max_price is not None:
+        products = products.filter(price__lte=max_price)
+
+    # Serialize the products and return the response
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
